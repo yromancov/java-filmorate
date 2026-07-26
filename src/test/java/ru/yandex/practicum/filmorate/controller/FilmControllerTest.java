@@ -14,15 +14,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class FilmControllerTest {
     private FilmController filmController;
     private Film film;
+
     @BeforeEach
-    void setUp(){
+    void setUp() {
         filmController = new FilmController();
 
         film = new Film();
         film.setName("The Odyseey");
         film.setDescription("Best film");
-        film.setReleaseDate(LocalDate.of(2026,7,17));
-        film.setDuration(Duration.ofMinutes(180));
+        film.setReleaseDate(LocalDate.of(2026, 7, 17));
+        film.setDuration(180);
     }
 
     @Test
@@ -62,7 +63,7 @@ public class FilmControllerTest {
 
     @Test
     void shouldRejectFilmWithZeroDuration() {
-        film.setDuration(Duration.ZERO);
+        film.setDuration(0);
 
         assertThrows(ValidationException.class, () -> filmController.add(film));
     }
