@@ -28,7 +28,6 @@ public class InMemoryUserStorage implements UserStorage {
     public User update(User newUser) {
         getUser(newUser.getId());
         users.put(newUser.getId(), newUser);
-        log.info("Пользователь с ID {} успешно обновлен ", newUser.getId());
         return newUser;
     }
 

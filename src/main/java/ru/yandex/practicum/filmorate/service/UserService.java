@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ import java.util.Set;
 public class UserService {
 
     private final UserStorage storage;
+    private final Set<String> userEmails = new HashSet<>();
 
     public UserService(UserStorage storage) {
         this.storage = storage;
@@ -29,8 +31,13 @@ public class UserService {
     public User add(User user) {
         log.info("Получен запрос POST /users");
         validateUser(user);
-        checkEmailNotTaken(user.getEmail(), null);
+        String nomralizedEmail = user.getEmail().toLowerCase();
+        if (userEmails.contains(nomralizedEmail)) {
+            log.warn("Обнаружен пользователь с уже существующим email{}", user.getEmail());
+            throw new DuplicateUserException("Пользователь с таким email уже существует.");
+        }
         User saved = storage.add(user);
+        userEmails.add(nomralizedEmail);
         log.info("Пользователь с id={} успешно добавлен", saved.getId());
         return saved;
     }
@@ -92,23 +99,24 @@ public class UserService {
             log.warn("Обновление невозможно: id пользователя не указан");
             throw new ValidationException("Id должен быть указан");
         }
-        storage.getUser(newUser.getId());
+        User oldUser = storage.getUser(newUser.getId());
         validateUser(newUser);
-        checkEmailNotTaken(newUser.getEmail(), newUser.getId());
+
+        String oldEmail = oldUser.getEmail().toLowerCase();
+        String newEmail = newUser.getEmail().toLowerCase();
+
+        userEmails.remove(oldEmail);
+
+        if (userEmails.contains(newEmail)) {
+            userEmails.add(oldEmail);
+            log.warn("Обнаружен пользователь с уже существующим email {}", newUser.getEmail());
+            throw new DuplicateUserException("Пользователь c таким email уже существует.");
+        }
+
+        userEmails.add(newEmail);
         User updated = storage.update(newUser);
         log.info("Пользователь с id={} успешно обновлён", updated.getId());
         return updated;
-    }
-
-    private void checkEmailNotTaken(String email, Long excludeUserId) {
-        String normalized = email.toLowerCase();
-        boolean taken = storage.findAll().stream()
-                .filter(u -> excludeUserId == null || !u.getId().equals(excludeUserId))
-                .anyMatch(u -> u.getEmail().equalsIgnoreCase(normalized));
-        if (taken) {
-            log.warn("Обнаружен пользователь с уже существующим email {}", email);
-            throw new DuplicateUserException("Пользователь с таким email уже существует.");
-        }
     }
 
 

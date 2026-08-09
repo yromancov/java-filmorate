@@ -19,7 +19,6 @@ import java.util.Set;
 public class Film {
     private Set<Long> likes = new HashSet<>();
     private Long id;
-    @NotNull
     @NotBlank
     private String name;
     @NotNull
