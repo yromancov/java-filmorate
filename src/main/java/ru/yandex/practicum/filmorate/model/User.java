@@ -23,6 +23,7 @@ public class User {
     @NotBlank(message = "Логин не должен быть пустым.")
     private String login;
     private String name;
+    @NotNull
     @PastOrPresent(message = "Дата рождения не может быть в будущем.")
     private LocalDate birthday;
 }

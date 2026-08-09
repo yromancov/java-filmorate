@@ -92,6 +92,7 @@ public class UserService {
             log.warn("Обновление невозможно: id пользователя не указан");
             throw new ValidationException("Id должен быть указан");
         }
+        storage.getUser(newUser.getId());
         validateUser(newUser);
         checkEmailNotTaken(newUser.getEmail(), newUser.getId());
         User updated = storage.update(newUser);

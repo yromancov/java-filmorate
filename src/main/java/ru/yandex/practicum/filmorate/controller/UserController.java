@@ -15,7 +15,7 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 public class UserController {
-    private UserService service;
+    private final UserService service;
 
     @GetMapping
     public Collection<User> findAll() {

@@ -6,8 +6,10 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.controller.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -15,13 +17,13 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
-    private UserController userController;
+    private UserService userService;
     private Validator validator;
     private User user;
 
     @BeforeEach
     void setUp() {
-        userController = new UserController();
+        userService = new UserService(new InMemoryUserStorage());
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
@@ -61,14 +63,14 @@ class UserControllerTest {
     void shouldRejectUserWithLoginContainingSpaces() {
         user.setLogin("john doe");
 
-        assertThrows(ValidationException.class, () -> userController.add(user));
+        assertThrows(ValidationException.class, () -> userService.add(user));
     }
 
     @Test
     void shouldSetLoginAsNameWhenNameIsBlank() {
         user.setName(" ");
 
-        User createdUser = userController.add(user);
+        User createdUser = userService.add(user);
 
         assertEquals(createdUser.getLogin(), createdUser.getName());
     }
@@ -85,6 +87,6 @@ class UserControllerTest {
     void shouldAcceptUserBornToday() {
         user.setBirthday(LocalDate.now());
 
-        assertDoesNotThrow(() -> userController.add(user));
+        assertDoesNotThrow(() -> userService.add(user));
     }
 }
