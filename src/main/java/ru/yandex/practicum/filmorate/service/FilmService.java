@@ -5,28 +5,64 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 
 @Service
 @Slf4j
 public class FilmService {
     private final FilmStorage storage;
+    private final UserService userService;
 
-    public FilmService(FilmStorage storage) {
+    public FilmService(FilmStorage storage, UserService service) {
         this.storage = storage;
+        this.userService = service;
     }
 
     public Collection<Film> findAll() {
         log.info("Получен запрос GET /films");
         return storage.findAll();
     }
+
+    public Film getFilm(long id) {
+        return storage.getFilm(id);
+    }
+
+    public void addLike(long id, long userId) {
+        Film film = storage.getFilm(id);
+        userService.getUser(userId);
+        film.getLikes().add(userId);
+        storage.update(film);
+        log.info("Пользователь с id={} поставил лайк фильму с id={}", userId, id);
+
+
+    }
+
+    public void deleteLike(long id, long userId) {
+        Film film = storage.getFilm(id);
+        userService.getUser(userId);
+        film.getLikes().remove(userId);
+        storage.update(film);
+        log.info("Пользователь с id={} удалил лайк фильму с id={}", userId, id);
+    }
+
+    public Collection<Film> listOfTopFilmsByCount(long count) {
+        Comparator<Film> comparator = Comparator.comparingInt((Film film) -> film.getLikes().size())
+                .reversed();
+        return findAll().stream()
+                .sorted(comparator)
+                .limit(count)
+                .toList();
+    }
+
     public Film add(Film film) {
         log.info("Получен запрос POST /films");
         validateFilm(film);
         Film saved = storage.add(film);
-        log.info("Фильм с id={} успешно добавлен", film.getId());
+        log.info("Фильм с id={} успешно добавлен", saved.getId());
         return saved;
     }
 

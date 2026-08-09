@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -33,15 +35,56 @@ public class UserService {
         return saved;
     }
 
-    public User getUser(long id){
+    public User getUser(long id) {
         return storage.getUser(id);
     }
 
-    public void addFriend(long id, long friendId){
-         storage.getUser(id).getFriends().add(friendId);
-         storage.getUser(friendId).getFriends().add(id);
+    public void addFriend(long id, long friendId) {
+        User user = storage.getUser(id);
+        User friend = storage.getUser(friendId);
+
+        user.getFriends().add(friendId);
+        friend.getFriends().add(id);
+
+        storage.update(user);
+        storage.update(friend);
+
 
     }
+
+    public Collection<User> getFriends(long id) {
+        return storage.getFriends(id);
+    }
+
+    public void deleteFriendById(long id, long friendId) {
+        User user = storage.getUser(id);
+        User friend = storage.getUser(friendId);
+
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(id);
+
+        storage.update(user);
+        storage.update(friend);
+
+    }
+
+    public Collection<User> getCommonFriends(long id, long otherId) {
+        User user = storage.getUser(id);
+        User otherUser = storage.getUser(otherId);
+
+        Set<Long> userFriends = user.getFriends();
+        Set<Long> otherUserFriends = otherUser.getFriends();
+
+        if (userFriends == null || userFriends.isEmpty() || otherUserFriends == null || otherUserFriends.isEmpty()) {
+            return List.of();
+        }
+        return userFriends.stream()
+                .filter(otherUserFriends::contains)
+                .map(storage::getUser)
+                .toList();
+
+    }
+
 
     public User update(User newUser) {
         log.info("Получен запрос PUT /users");
@@ -59,7 +102,7 @@ public class UserService {
     private void checkEmailNotTaken(String email, Long excludeUserId) {
         String normalized = email.toLowerCase();
         boolean taken = storage.findAll().stream()
-                .filter(u -> !u.getId().equals(excludeUserId))
+                .filter(u -> excludeUserId == null || !u.getId().equals(excludeUserId))
                 .anyMatch(u -> u.getEmail().equalsIgnoreCase(normalized));
         if (taken) {
             log.warn("Обнаружен пользователь с уже существующим email {}", email);

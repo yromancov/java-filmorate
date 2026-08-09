@@ -26,17 +26,35 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User newUser) {
-        if (!users.containsKey(newUser.getId())) {
-            log.warn("Пользователь с ID {} не найден ", newUser.getId());
-            throw new NotFoundException("Пользователь с ID " + newUser.getId() + " не найден.");
-        }
+        getUser(newUser.getId());
         users.put(newUser.getId(), newUser);
+        log.info("Пользователь с ID {} успешно обновлен ", newUser.getId());
         return newUser;
     }
 
     @Override
-    public User getUser(long id){
+    public User getUser(long id) {
+        if (!users.containsKey(id)) {
+            log.warn("Пользователь с ID {} не найден ", id);
+            throw new NotFoundException("Пользователь с ID " + id + " не найден.");
+        }
+        log.info("Пользователь с ID {} найден ", id);
         return users.get(id);
+    }
+
+
+    @Override
+    public Collection<User> getFriends(long id) {
+        User user = getUser(id);
+        Set<Long> friendsId = user.getFriends();
+        if (friendsId == null) {
+            return List.of();
+        }
+        return friendsId.stream()
+                .map(this::getUser)
+                .filter(Objects::nonNull)
+                .toList();
+
     }
 
 
@@ -49,4 +67,5 @@ public class InMemoryUserStorage implements UserStorage {
                 .orElse(0);
         return ++currentMaxId;
     }
+
 }

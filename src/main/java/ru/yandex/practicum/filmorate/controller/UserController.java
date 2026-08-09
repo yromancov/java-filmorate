@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+
 import java.util.*;
 
 
@@ -26,18 +27,29 @@ public class UserController {
         return service.add(user);
     }
 
-    @GetMapping("/{id}/friends"){
-
+    @GetMapping("/{id}/friends")
+    public Collection<User> getFriends(@PathVariable long id) {
+        return service.getFriends(id);
     }
 
-    @GetMapping("{/id}")
-    public User getUserById(@PathVariable long id){
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable long id) {
         return service.getUser(id);
     }
 
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriendById(@PathVariable long id, @PathVariable long friendId) {
+        service.deleteFriendById(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
+        return service.getCommonFriends(id, otherId);
+    }
+
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable long id, @PathVariable long friendId){
-        service.addFriend(id,friendId);
+    public void addFriend(@PathVariable long id, @PathVariable long friendId) {
+        service.addFriend(id, friendId);
     }
 
     @PutMapping
