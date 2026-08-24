@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.StatusFriend;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -46,16 +47,16 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public Collection<User> getFriends(long id) {
         User user = getUser(id);
-        Set<Long> friendsId = user.getFriends();
-        if (friendsId == null) {
+        Map<Long, StatusFriend> friendsMap = user.getFriends();
+        if (friendsMap == null || friendsMap.isEmpty()) {
             return List.of();
         }
-        return friendsId.stream()
+        return friendsMap.keySet().stream()
                 .map(this::getUser)
                 .filter(Objects::nonNull)
                 .toList();
-
     }
+
 
 
     @Override

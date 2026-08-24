@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.exception.DuplicateUserException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.StatusFriend;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -43,8 +44,12 @@ public class UserService {
         User user = storage.getUser(id);
         User friend = storage.getUser(friendId);
 
-        user.getFriends().add(friendId);
-        friend.getFriends().add(id);
+        if(friend.getFriends().containsKey(id)){
+            user.getFriends().put(friendId, StatusFriend.CONFIRM);
+            friend.getFriends().put(id, StatusFriend.CONFIRM);
+        }else{
+            user.getFriends().put(friendId, StatusFriend.NOT_CONFIRM);
+        }
 
         storage.update(user);
         storage.update(friend);
@@ -72,10 +77,10 @@ public class UserService {
         User user = storage.getUser(id);
         User otherUser = storage.getUser(otherId);
 
-        Set<Long> userFriends = user.getFriends();
-        Set<Long> otherUserFriends = otherUser.getFriends();
+        Set<Long> userFriends = user.getFriends().keySet();
+        Set<Long> otherUserFriends = otherUser.getFriends().keySet();
 
-        if (userFriends == null || userFriends.isEmpty() || otherUserFriends == null || otherUserFriends.isEmpty()) {
+        if (userFriends.isEmpty() || otherUserFriends.isEmpty()) {
             return List.of();
         }
         return userFriends.stream()
