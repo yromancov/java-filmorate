@@ -28,6 +28,5 @@ public class User {
     @NotNull
     @PastOrPresent(message = "Дата рождения не может быть в будущем.")
     private LocalDate birthday;
-    @NotNull
-    private StatusFriend friendship;
+
 }

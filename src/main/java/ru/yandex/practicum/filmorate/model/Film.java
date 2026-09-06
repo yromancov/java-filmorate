@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -29,10 +28,7 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    @NotBlank
     private Set<Genre> genres = new LinkedHashSet<>();
-    @NotBlank
-    private AgeRating ageRating;
-
-
+    @NotNull
+    private AgeRating mpa;
 }

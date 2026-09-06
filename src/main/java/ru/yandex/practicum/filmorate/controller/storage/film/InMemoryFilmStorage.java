@@ -6,8 +6,10 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -27,34 +29,47 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilm(long id) {
-        if (!films.containsKey(id)) {
-            log.warn("Фильм с id={} не найден", id);
-            throw new NotFoundException("Фильм с id = " + id + " не найден");
-        }
-        log.info("Фильм с id={} найден", id);
-        return films.get(id);
+    public Optional<Film> getFilm(long id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
     public Film update(Film film) {
-        getFilm(film.getId());
+        getFilmOrThrow(film.getId());
         films.put(film.getId(), film);
         log.info("Данные фильма с id={} успешно обновлены", film.getId());
         return film;
     }
 
+    @Override
+    public void addLike(long filmId, long userId) {
+        getFilmOrThrow(filmId).getLikes().add(userId);
+    }
 
     @Override
-    public long getNextId() {
+    public void deleteLike(long filmId, long userId) {
+        getFilmOrThrow(filmId).getLikes().remove(userId);
+    }
+
+    @Override
+    public Collection<Film> getPopular(long count) {
+        return films.values().stream()
+                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
+                .limit(count)
+                .toList();
+    }
+
+    private Film getFilmOrThrow(long id) {
+        return getFilm(id).orElseThrow(() ->
+                new NotFoundException("Фильм с id = " + id + " не найден"));
+    }
+
+    private long getNextId() {
         long currentMaxId = films.keySet()
                 .stream()
                 .mapToLong(id -> id)
                 .max()
                 .orElse(0);
-
         return ++currentMaxId;
     }
-
-
 }

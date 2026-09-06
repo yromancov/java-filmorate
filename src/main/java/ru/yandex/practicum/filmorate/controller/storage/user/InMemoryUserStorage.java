@@ -27,39 +27,72 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User newUser) {
-        getUser(newUser.getId());
+        getUserOrThrow(newUser.getId());
         users.put(newUser.getId(), newUser);
         log.info("Пользователь с ID {} успешно обновлен ", newUser.getId());
         return newUser;
     }
 
+    private User getUserOrThrow(long id) {
+        return getUser(id).orElseThrow(() ->
+                new NotFoundException("Пользователь с ID " + id + " не найден."));
+    }
+
     @Override
-    public User getUser(long id) {
-        if (!users.containsKey(id)) {
+    public Optional<User> getUser(long id) {
+        User user = users.get(id);
+        if (user == null) {
             log.warn("Пользователь с ID {} не найден ", id);
-            throw new NotFoundException("Пользователь с ID " + id + " не найден.");
+            return Optional.empty();
         }
         log.info("Пользователь с ID {} найден ", id);
-        return users.get(id);
+        return Optional.of(user);
     }
 
 
     @Override
     public Collection<User> getFriends(long id) {
-        User user = getUser(id);
+        User user = getUserOrThrow(id);
         Map<Long, StatusFriend> friendsMap = user.getFriends();
         if (friendsMap == null || friendsMap.isEmpty()) {
             return List.of();
         }
         return friendsMap.keySet().stream()
-                .map(this::getUser)
+                .map(users::get)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    @Override
+    public void addFriend(long id, long friendId) {
+        User user = getUserOrThrow(id);
+        User friend = getUserOrThrow(friendId);
+
+        if (friend.getFriends().containsKey(id)) {
+            user.getFriends().put(friendId, StatusFriend.CONFIRM);
+            friend.getFriends().put(id, StatusFriend.CONFIRM);
+        } else {
+            user.getFriends().put(friendId, StatusFriend.NOT_CONFIRM);
+        }
+    }
+
+    @Override
+    public void deleteFriend(long id, long friendId) {
+        getUserOrThrow(id).getFriends().remove(friendId);
+        getUserOrThrow(friendId).getFriends().remove(id);
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(long id, long otherId) {
+        Set<Long> otherFriends = getUserOrThrow(otherId).getFriends().keySet();
+        return getUserOrThrow(id).getFriends().keySet().stream()
+                .filter(otherFriends::contains)
+                .map(users::get)
                 .filter(Objects::nonNull)
                 .toList();
     }
 
 
-
-    @Override
     public long getNextId() {
         long currentMaxId = users.keySet()
                 .stream()

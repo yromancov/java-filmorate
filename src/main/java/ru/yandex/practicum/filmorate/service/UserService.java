@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.exception.DuplicateUserException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.StatusFriend;
 import ru.yandex.practicum.filmorate.model.User;
@@ -15,10 +17,9 @@ import java.util.Set;
 @Service
 @Slf4j
 public class UserService {
-
     private final UserStorage storage;
 
-    public UserService(UserStorage storage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage storage) {
         this.storage = storage;
     }
 
@@ -37,24 +38,14 @@ public class UserService {
     }
 
     public User getUser(long id) {
-        return storage.getUser(id);
+        return storage.getUser(id).orElseThrow(() ->
+                new NotFoundException("Пользователь с ID " + id + " не найден."));
     }
 
     public void addFriend(long id, long friendId) {
-        User user = storage.getUser(id);
-        User friend = storage.getUser(friendId);
-
-        if(friend.getFriends().containsKey(id)){
-            user.getFriends().put(friendId, StatusFriend.CONFIRM);
-            friend.getFriends().put(id, StatusFriend.CONFIRM);
-        }else{
-            user.getFriends().put(friendId, StatusFriend.NOT_CONFIRM);
-        }
-
-        storage.update(user);
-        storage.update(friend);
-
-
+        getUser(id);
+        getUser(friendId);
+        storage.addFriend(id, friendId);
     }
 
     public Collection<User> getFriends(long id) {
@@ -62,32 +53,15 @@ public class UserService {
     }
 
     public void deleteFriendById(long id, long friendId) {
-        User user = storage.getUser(id);
-        User friend = storage.getUser(friendId);
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(id);
-
-        storage.update(user);
-        storage.update(friend);
-
+        getUser(id);
+        getUser(friendId);
+        storage.deleteFriend(id, friendId);
     }
 
     public Collection<User> getCommonFriends(long id, long otherId) {
-        User user = storage.getUser(id);
-        User otherUser = storage.getUser(otherId);
-
-        Set<Long> userFriends = user.getFriends().keySet();
-        Set<Long> otherUserFriends = otherUser.getFriends().keySet();
-
-        if (userFriends.isEmpty() || otherUserFriends.isEmpty()) {
-            return List.of();
-        }
-        return userFriends.stream()
-                .filter(otherUserFriends::contains)
-                .map(storage::getUser)
-                .toList();
-
+        getUser(id);
+        getUser(otherId);
+        return storage.getCommonFriends(id, otherId);
     }
 
 
@@ -97,7 +71,7 @@ public class UserService {
             log.warn("Обновление невозможно: id пользователя не указан");
             throw new ValidationException("Id должен быть указан");
         }
-        storage.getUser(newUser.getId());
+        getUser(newUser.getId());
         validateUser(newUser);
         checkEmailNotTaken(newUser.getEmail(), newUser.getId());
         User updated = storage.update(newUser);
