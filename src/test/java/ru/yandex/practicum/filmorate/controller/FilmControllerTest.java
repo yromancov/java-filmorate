@@ -1,5 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import static org.mockito.Mockito.*;
+
+import org.mockito.Mockito;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -7,13 +10,17 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.controller.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.controller.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.controller.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -27,9 +34,12 @@ public class FilmControllerTest {
 
     @BeforeEach
     void setUp() {
+        MpaDbStorage mpaStorage = Mockito.mock(MpaDbStorage.class);
+        GenreDbStorage genreStorage = Mockito.mock(GenreDbStorage.class);
+        when(mpaStorage.findById(anyInt())).thenReturn(Optional.of(new Mpa()));
         filmService = new FilmService(
                 new InMemoryFilmStorage(),
-                new UserService(new InMemoryUserStorage())
+                new UserService(new InMemoryUserStorage()), mpaStorage, genreStorage
         );
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -40,6 +50,9 @@ public class FilmControllerTest {
         film.setDescription("Best film");
         film.setReleaseDate(LocalDate.of(2026, 7, 17));
         film.setDuration(180);
+        Mpa mpa = new Mpa();
+        mpa.setId(1);
+        film.setMpa(mpa);
     }
 
     @Test

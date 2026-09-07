@@ -1,9 +1,12 @@
 package ru.yandex.practicum.filmorate.controller.storage.genre;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.yandex.practicum.filmorate.dal.BaseStorage;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
@@ -22,7 +25,8 @@ public class GenreDbStorage extends BaseStorage<Genre> {
         return findMany(FIND_ALL_QUERY);
     }
 
+    @ResponseStatus(HttpStatus.OK)
     public Optional<Genre> findById(int id) {
-        return findOne(FIND_BY_ID_QUERY, id);
+        return Optional.of(findOne(FIND_BY_ID_QUERY, id).orElseThrow(() -> new NotFoundException("Жанр с id = " + id + " не найден")));
     }
 }

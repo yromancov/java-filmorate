@@ -30,5 +30,5 @@ public class Film {
     private int duration;
     private Set<Genre> genres = new LinkedHashSet<>();
     @NotNull
-    private AgeRating mpa;
+    private Mpa mpa;
 }

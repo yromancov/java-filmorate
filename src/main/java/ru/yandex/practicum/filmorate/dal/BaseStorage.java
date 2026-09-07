@@ -47,8 +47,8 @@ public class BaseStorage<T> {
             }
             return ps;
         }, keyHolder);
-
-        Long id = keyHolder.getKeyAs(Long.class);
+        Number key = keyHolder.getKey();
+        Long id = (key != null) ? key.longValue() : null;
         if (id == null) {
             throw new RuntimeException("Не удалось сохранить данные");
         }

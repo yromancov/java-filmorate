@@ -10,11 +10,9 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
 
 @Service
 @Slf4j
@@ -43,6 +41,7 @@ public class FilmService {
         return storage.getFilm(id).orElseThrow(() ->
                 new NotFoundException("Фильм с id = " + id + " не найден"));
     }
+
     public void addLike(long id, long userId) {
         getFilm(id);
         userService.getUser(userId);

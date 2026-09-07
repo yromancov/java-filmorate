@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.StatusFriend;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Component("userDbStorage")
@@ -79,12 +78,12 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     @Override
     public Optional<User> getUser(long id) {
-        return findOne(FIND_BY_ID_QUERY,id);
+        return findOne(FIND_BY_ID_QUERY, id);
     }
 
     @Override
     public Collection<User> getFriends(long id) {
-        return findMany(FIND_ALL_FRIENDS,id);
+        return findMany(FIND_ALL_FRIENDS, id);
     }
 
     @Override
