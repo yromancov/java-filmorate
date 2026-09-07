@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -51,6 +52,12 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     private static final String DELETE_LIKE_QUERY =
             "DELETE FROM likesfilms WHERE film_id = ? AND user_id = ?";
+
+    private static final String FIND_GENRES_FOR_FILMS_QUERY =
+            "SELECT fg.film_id, g.* FROM genre g " +
+                    "JOIN film_genre fg ON g.genre_id = fg.genre_id " +
+                    "WHERE fg.film_id IN (%s) ORDER BY g.genre_id";
+
 
     private static final String FIND_POPULAR_QUERY =
             "SELECT f.*, m.name AS mpa_name, COUNT(l.user_id) AS likes_count " +
@@ -123,6 +130,19 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         return films;
     }
 
+    private void loadGenresForFilms(List<Film> films){
+        if (films.isEmpty()){
+            return;
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i <films.size() ; i++) {
+            stringBuilder.append(films.get(i).getId());
+            if (i<films.size()-1){
+                stringBuilder.append(",");
+            }
+        }
+    }
+
     @Override
     public void addLike(long filmId, long userId) {
         Integer count = jdbc.queryForObject(EXISTS_LIKE_QUERY, Integer.class, filmId, userId);
@@ -145,8 +165,13 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         if (film.getGenres() == null) {
             return;
         }
-        for (Genre genre : film.getGenres()) {
-            jdbc.update(INSERT_GENRE_QUERY, film.getId(), genre.getId());
-        }
+        List<Genre> genres = List.copyOf(film.getGenres());
+        jdbc.batchUpdate(INSERT_GENRE_QUERY,
+                genres, genres.size(),
+                (PreparedStatement ps, Genre genre) -> {
+                    ps.setLong(1, film.getId());
+                    ps.setInt(2, genre.getId());
+                }
+        );
     }
 }
