@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.controller.storage;
 
 public class ErrorResponse {
-    // название ошибки
-    String error;
-    // подробное описание
+
+    private String error;
+
 
     public ErrorResponse(String error) {
         this.error = error;

@@ -21,7 +21,6 @@ public class User {
     @NotBlank(message = "Почта не может быть пустой.")
     @Email(message = "Почта должна соответствовать формату email (содержать @).")
     private String email;
-    @NotNull
     @NotBlank(message = "Логин не должен быть пустым.")
     private String login;
     private String name;
