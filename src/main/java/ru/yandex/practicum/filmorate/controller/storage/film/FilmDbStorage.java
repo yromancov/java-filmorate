@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller.storage.film;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dal.BaseStorage;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -9,10 +10,8 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component("filmDbStorage")
 public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
@@ -44,9 +43,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "JOIN film_genre fg ON g.genre_id = fg.genre_id " +
                     "WHERE fg.film_id = ? ORDER BY g.genre_id";
 
-    private static final String FIND_LIKES_QUERY =
-            "SELECT user_id FROM likesfilms WHERE film_id = ?";
-
     private static final String INSERT_LIKE_QUERY =
             "INSERT INTO likesfilms(film_id, user_id) VALUES (?, ?)";
 
@@ -56,7 +52,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     private static final String FIND_GENRES_FOR_FILMS_QUERY =
             "SELECT fg.film_id, g.* FROM genre g " +
                     "JOIN film_genre fg ON g.genre_id = fg.genre_id " +
-                    "WHERE fg.film_id IN (%s) ORDER BY g.genre_id";
+                    "WHERE fg.film_id IN (:ids) ORDER BY g.genre_id";
 
 
     private static final String FIND_POPULAR_QUERY =
@@ -72,16 +68,18 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
 
     private final RowMapper<Genre> genreMapper;
+    private final NamedParameterJdbcTemplate namedJdbc;
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, RowMapper<Genre> genreMapper) {
         super(jdbc, mapper);
         this.genreMapper = genreMapper;
+        this.namedJdbc = new NamedParameterJdbcTemplate(jdbc);
     }
 
     @Override
     public Collection<Film> findAll() {
         List<Film> films = findMany(FIND_ALL_QUERY);
-        films.forEach(this::loadGenres);
+        loadGenresForFilms(films);
         return films;
     }
 
@@ -126,21 +124,20 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     @Override
     public Collection<Film> getPopular(long count) {
         List<Film> films = findMany(FIND_POPULAR_QUERY, count);
-        films.forEach(this::loadGenres);
+        loadGenresForFilms(films);
         return films;
     }
 
-    private void loadGenresForFilms(List<Film> films){
-        if (films.isEmpty()){
+    private void loadGenresForFilms(List<Film> films) {
+        if (films.isEmpty()) {
             return;
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i <films.size() ; i++) {
-            stringBuilder.append(films.get(i).getId());
-            if (i<films.size()-1){
-                stringBuilder.append(",");
-            }
-        }
+        Map<Long, Film> byId = films.stream()
+                .collect(Collectors.toMap(Film::getId, film -> film));
+
+        namedJdbc.query(FIND_GENRES_FOR_FILMS_QUERY, Map.of("ids", byId.keySet()), rs -> {
+            byId.get(rs.getLong("film_id")).getGenres().add(genreMapper.mapRow(rs, 0));
+        });
     }
 
     @Override

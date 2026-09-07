@@ -6,6 +6,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import ru.yandex.practicum.filmorate.controller.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -14,6 +16,8 @@ import java.time.LocalDate;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 class UserControllerTest {
     private UserService userService;
@@ -22,8 +26,9 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(new InMemoryUserStorage());
-
+        UserStorage userStorage = Mockito.mock(UserStorage.class);
+        when(userStorage.add(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+        userService = new UserService(userStorage);
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
 

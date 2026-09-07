@@ -9,6 +9,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.controller.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.controller.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.controller.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -21,8 +22,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FilmControllerTest {
@@ -32,13 +31,15 @@ public class FilmControllerTest {
 
     @BeforeEach
     void setUp() {
+        FilmStorage filmStorage = Mockito.mock(FilmStorage.class);
+        UserService userService = Mockito.mock(UserService.class);
         MpaDbStorage mpaStorage = Mockito.mock(MpaDbStorage.class);
         GenreDbStorage genreStorage = Mockito.mock(GenreDbStorage.class);
+
         when(mpaStorage.findById(anyInt())).thenReturn(Optional.of(new Mpa()));
-        filmService = new FilmService(
-                new InMemoryFilmStorage(),
-                new UserService(new InMemoryUserStorage()), mpaStorage, genreStorage
-        );
+        when(filmStorage.add(any(Film.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        filmService = new FilmService(filmStorage, userService, mpaStorage, genreStorage);
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();

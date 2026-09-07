@@ -13,6 +13,9 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -97,10 +100,16 @@ public class FilmService {
         mpaStorage.findById(film.getMpa().getId()).orElseThrow(() ->
                 new NotFoundException("Рейтинг с id = " + film.getMpa().getId() + " не найден"));
 
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                genreStorage.findById(genre.getId()).orElseThrow(() ->
-                        new NotFoundException("Жанр с id = " + genre.getId() + " не найден"));
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            Set<Integer> requested = film.getGenres().stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
+
+            Set<Integer> missing = new HashSet<>(requested);
+            missing.removeAll(genreStorage.findExistingIds(requested));
+
+            if (!missing.isEmpty()) {
+                throw new NotFoundException("Жанр с id = " + missing.iterator().next() + " не найден");
             }
         }
 
