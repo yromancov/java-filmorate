@@ -1,25 +1,22 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.exception.DuplicateUserException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Service
 @Slf4j
 public class UserService {
-
     private final UserStorage storage;
-    private final Set<String> userEmails = new HashSet<>();
 
-    public UserService(UserStorage storage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage storage) {
         this.storage = storage;
     }
 
@@ -31,65 +28,38 @@ public class UserService {
     public User add(User user) {
         log.info("Получен запрос POST /users");
         validateUser(user);
-        String nomralizedEmail = user.getEmail().toLowerCase();
-        if (userEmails.contains(nomralizedEmail)) {
-            log.warn("Обнаружен пользователь с уже существующим email{}", user.getEmail());
-            throw new DuplicateUserException("Пользователь с таким email уже существует.");
-        }
+        checkEmailNotTaken(user.getEmail(), null);
         User saved = storage.add(user);
-        userEmails.add(nomralizedEmail);
         log.info("Пользователь с id={} успешно добавлен", saved.getId());
         return saved;
     }
 
     public User getUser(long id) {
-        return storage.getUser(id);
+        return storage.getUser(id).orElseThrow(() ->
+                new NotFoundException("Пользователь с ID " + id + " не найден."));
     }
 
     public void addFriend(long id, long friendId) {
-        User user = storage.getUser(id);
-        User friend = storage.getUser(friendId);
-
-        user.getFriends().add(friendId);
-        friend.getFriends().add(id);
-
-        storage.update(user);
-        storage.update(friend);
-
-
+        getUser(id);
+        getUser(friendId);
+        storage.addFriend(id, friendId);
     }
 
     public Collection<User> getFriends(long id) {
+        getUser(id);
         return storage.getFriends(id);
     }
 
     public void deleteFriendById(long id, long friendId) {
-        User user = storage.getUser(id);
-        User friend = storage.getUser(friendId);
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(id);
-
-        storage.update(user);
-        storage.update(friend);
-
+        getUser(id);
+        getUser(friendId);
+        storage.deleteFriend(id, friendId);
     }
 
     public Collection<User> getCommonFriends(long id, long otherId) {
-        User user = storage.getUser(id);
-        User otherUser = storage.getUser(otherId);
-
-        Set<Long> userFriends = user.getFriends();
-        Set<Long> otherUserFriends = otherUser.getFriends();
-
-        if (userFriends == null || userFriends.isEmpty() || otherUserFriends == null || otherUserFriends.isEmpty()) {
-            return List.of();
-        }
-        return userFriends.stream()
-                .filter(otherUserFriends::contains)
-                .map(storage::getUser)
-                .toList();
-
+        getUser(id);
+        getUser(otherId);
+        return storage.getCommonFriends(id, otherId);
     }
 
 
@@ -99,24 +69,23 @@ public class UserService {
             log.warn("Обновление невозможно: id пользователя не указан");
             throw new ValidationException("Id должен быть указан");
         }
-        User oldUser = storage.getUser(newUser.getId());
+        getUser(newUser.getId());
         validateUser(newUser);
-
-        String oldEmail = oldUser.getEmail().toLowerCase();
-        String newEmail = newUser.getEmail().toLowerCase();
-
-        userEmails.remove(oldEmail);
-
-        if (userEmails.contains(newEmail)) {
-            userEmails.add(oldEmail);
-            log.warn("Обнаружен пользователь с уже существующим email {}", newUser.getEmail());
-            throw new DuplicateUserException("Пользователь c таким email уже существует.");
-        }
-
-        userEmails.add(newEmail);
+        checkEmailNotTaken(newUser.getEmail(), newUser.getId());
         User updated = storage.update(newUser);
         log.info("Пользователь с id={} успешно обновлён", updated.getId());
         return updated;
+    }
+
+    private void checkEmailNotTaken(String email, Long excludeUserId) {
+        String normalized = email.toLowerCase();
+        boolean taken = storage.findAll().stream()
+                .filter(u -> excludeUserId == null || !u.getId().equals(excludeUserId))
+                .anyMatch(u -> u.getEmail().equalsIgnoreCase(normalized));
+        if (taken) {
+            log.warn("Обнаружен пользователь с уже существующим email {}", email);
+            throw new DuplicateUserException("Пользователь с таким email уже существует.");
+        }
     }
 
 

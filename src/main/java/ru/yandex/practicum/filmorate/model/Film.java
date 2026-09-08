@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -11,6 +10,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
@@ -28,6 +28,7 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-
-
+    private Set<Genre> genres = new LinkedHashSet<>();
+    @NotNull
+    private Mpa mpa;
 }

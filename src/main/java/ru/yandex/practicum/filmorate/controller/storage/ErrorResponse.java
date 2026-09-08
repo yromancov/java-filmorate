@@ -10,6 +10,7 @@ public class ErrorResponse {
 
     }
 
+    // геттеры необходимы, чтобы Spring Boot мог получить значения полей
     public String getError() {
         return error;
     }

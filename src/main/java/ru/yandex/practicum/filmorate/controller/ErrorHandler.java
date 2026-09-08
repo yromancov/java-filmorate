@@ -18,35 +18,34 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidation(final ValidationException e) {
-        log.error("Ошибка валидации: {}", e.getMessage());
+        log.warn("400 Ошибка валидации: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleDefault(final Throwable e) {
-        log.error("Ошибка сервера: {}", e.getMessage());
+        log.error("500 Непредвиденнная ошибка", e);
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleDuplicate(final DuplicateUserException e) {
-        log.error("Ошибка дублирования данных: {}", e.getMessage());
+        log.warn("409 Конфликт данных: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(final NotFoundException e) {
-        log.error("Ресурс не найден: {}", e.getMessage());
+        log.warn("404 Объект не найден {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValid(final MethodArgumentNotValidException e) {
-        log.error("Ошибка валидации данных: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 }

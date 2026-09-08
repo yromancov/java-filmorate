@@ -1,23 +1,27 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import static org.mockito.Mockito.*;
+
+import org.mockito.Mockito;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.controller.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.controller.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.controller.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.controller.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FilmControllerTest {
@@ -27,10 +31,15 @@ public class FilmControllerTest {
 
     @BeforeEach
     void setUp() {
-        filmService = new FilmService(
-                new InMemoryFilmStorage(),
-                new UserService(new InMemoryUserStorage())
-        );
+        FilmStorage filmStorage = Mockito.mock(FilmStorage.class);
+        UserService userService = Mockito.mock(UserService.class);
+        MpaDbStorage mpaStorage = Mockito.mock(MpaDbStorage.class);
+        GenreDbStorage genreStorage = Mockito.mock(GenreDbStorage.class);
+
+        when(mpaStorage.findById(anyInt())).thenReturn(Optional.of(new Mpa()));
+        when(filmStorage.add(any(Film.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        filmService = new FilmService(filmStorage, userService, mpaStorage, genreStorage);
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
@@ -40,6 +49,9 @@ public class FilmControllerTest {
         film.setDescription("Best film");
         film.setReleaseDate(LocalDate.of(2026, 7, 17));
         film.setDuration(180);
+        Mpa mpa = new Mpa();
+        mpa.setId(1);
+        film.setMpa(mpa);
     }
 
     @Test
