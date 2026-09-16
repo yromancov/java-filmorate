@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.*;
 
 @Component
-public class GenreDbStorage extends BaseStorage<Genre> {
+public class GenreDbStorage extends BaseStorage<Genre> implements GenreStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM genre ORDER BY genre_id";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM genre WHERE genre_id = ?";
     private static final String FIND_EXISTING_IDS_QUERY =

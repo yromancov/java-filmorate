@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Component
-public class MpaDbStorage extends BaseStorage<Mpa> {
+public class MpaDbStorage extends BaseStorage<Mpa> implements MpaStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM mpa ORDER BY age_rating_id";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM mpa WHERE age_rating_id = ?";
 
