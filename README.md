@@ -4,7 +4,7 @@ Template repository for Filmorate project.
 
 ## Диаграмма сущностей (ER-диаграмма)
 
-![Диаграмма базы данных](./scheme2.png) 
+![Диаграмма базы данных](scheme3.png) 
 
 ## Пояснение к схеме
 
