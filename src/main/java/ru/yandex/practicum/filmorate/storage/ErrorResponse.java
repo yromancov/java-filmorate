@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controller.storage;
+package ru.yandex.practicum.filmorate.storage;
 
 public class ErrorResponse {
 

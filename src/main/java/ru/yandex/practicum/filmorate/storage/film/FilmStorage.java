@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controller.storage.film;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
 

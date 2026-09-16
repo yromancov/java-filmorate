@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controller.storage.user;
+package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
