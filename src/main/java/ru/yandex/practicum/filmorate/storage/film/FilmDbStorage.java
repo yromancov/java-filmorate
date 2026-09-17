@@ -13,7 +13,7 @@ import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component("filmDbStorage")
+@Component
 public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     private static final String SELECT_BASE =
             "SELECT f.*, m.name AS mpa_name " +

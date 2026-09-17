@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.Optional;
 
-@Component("userDbStorage")
+@Component
 public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
     private static final String FIND_ALL_FRIENDS = "SELECT u.* FROM users u " +

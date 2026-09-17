@@ -12,6 +12,5 @@ import ru.yandex.practicum.filmorate.service.DirectorService;
 public class DirectorController {
     private final DirectorService service;
 
-    @GetMapping
-    public C
+
 }

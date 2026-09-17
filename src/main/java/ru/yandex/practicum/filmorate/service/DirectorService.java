@@ -31,13 +31,13 @@ public class DirectorService {
     }
 
     public Director findById(long id) {
-        return storage.findById(id).orElseThrow(() ->
+        return storage.findById((int) id).orElseThrow(() ->
                 new NotFoundException("Режиссер с Id " + id + " не найден."));
 
     }
     public Director update(Director newDirector){
         log.info("Получен запрос PUT /dorectors");
-        if (newDirector.getId() == null){
+        if (newDirector.getId() == 0){
             log.warn("Обновление невозможно: Id режиccера не указан");
             throw new ValidationException("Id должен быть указан");
         }
@@ -45,6 +45,15 @@ public class DirectorService {
         Director updated = storage.update(newDirector);
         log.info("Режиссер с id={} успешно обновлён", updated.getId());
         return updated;
+    }
+
+    public void deleteDirector(int id){
+        log.info("Получен запрос DELETE /directors/{}",id);
+        if (!storage.deleteDirector(id)){
+            throw new NotFoundException("Режиссёр с id = " + id + " не найден");
+
+        }
+        log.info("Режиссёр с id ={} удален", id);
     }
 
 }
