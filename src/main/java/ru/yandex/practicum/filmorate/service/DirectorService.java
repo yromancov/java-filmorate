@@ -46,5 +46,5 @@ public class DirectorService {
         log.info("Режиссер с id={} успешно обновлён", updated.getId());
         return updated;
     }
-    public void delete
+
 }

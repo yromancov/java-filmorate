@@ -39,7 +39,7 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     }
 
     @Override
-    public Optional<Director> findById(long id) {
+    public Optional<Director> findById(int id) {
         return Optional.of(findOne(FIND_BY_ID_QUERY, id).orElseThrow(()
                 -> new NotFoundException("Директор с id = " + id + " не найден")));
     }
@@ -53,10 +53,10 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
 
     @Override
     public Director add(Director director){
-        long id = insert(
+        int id = Math.toIntExact(insert(
                 INSERT_QUERY,
                 director.getName()
-        );
+        ));
         director.setId(id);
         return director;
     }
@@ -72,7 +72,7 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     }
 
     @Override
-    public void deleteDirector(long id) {
+    public void deleteDirector(int id) {
         super.update(
                 DELETE_QUERY,
                 id

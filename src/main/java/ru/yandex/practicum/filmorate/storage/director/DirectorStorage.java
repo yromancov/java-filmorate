@@ -9,7 +9,7 @@ import java.util.Set;
 public interface DirectorStorage {
     Collection<Director> findAll();
 
-    Optional<Director> findById(long id);
+    Optional<Director> findById(int id);
 
     //Метод для поиска несуществующих "id" переданным пользователем
     Set<Integer> findExistingIds(Collection<Integer> ids);
@@ -18,5 +18,5 @@ public interface DirectorStorage {
 
     Director update(Director newDirector);
 
-    void deleteDirector(long id);
+    void deleteDirector(int id);
 }
