@@ -47,9 +47,9 @@ public class DirectorService {
         return updated;
     }
 
-    public void deleteDirector(int id){
+    public void deleteDirectorById(int id){
         log.info("Получен запрос DELETE /directors/{}",id);
-        if (!storage.deleteDirector(id)){
+        if (!storage.deleteDirectorById(id)){
             throw new NotFoundException("Режиссёр с id = " + id + " не найден");
 
         }

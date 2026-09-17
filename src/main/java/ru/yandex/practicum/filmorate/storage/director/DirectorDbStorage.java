@@ -72,7 +72,7 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     }
 
     @Override
-    public boolean deleteDirector(int id) {
+    public boolean deleteDirectorById(int id) {
         return super.delete(
                 DELETE_QUERY,
                 id
