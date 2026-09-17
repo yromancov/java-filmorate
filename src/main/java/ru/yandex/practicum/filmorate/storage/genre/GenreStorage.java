@@ -11,5 +11,6 @@ public interface GenreStorage {
 
     Optional<Genre> findById(int id);
 
+    //Метод для поиска несуществующих "id" переданным пользователем
     Set<Integer> findExistingIds(Collection<Integer> ids);
 }

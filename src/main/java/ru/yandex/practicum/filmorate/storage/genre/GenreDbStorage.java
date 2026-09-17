@@ -21,6 +21,11 @@ public class GenreDbStorage extends BaseStorage<Genre> implements GenreStorage {
 
     public GenreDbStorage(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper);
+
+        // Что это такое?
+        // Обёртка над JdbcTemplate
+        // С его помощью в SQL запрос вместо одного параметра через {WHERE genre_id = ?}
+        // можно передать несколько значений через {WHERE genre_id IN (:ids) где ids наша коллекция id}
         this.namedJdbc = new NamedParameterJdbcTemplate(jdbc);
     }
 
@@ -29,9 +34,16 @@ public class GenreDbStorage extends BaseStorage<Genre> implements GenreStorage {
     }
 
     public Optional<Genre> findById(int id) {
-        return Optional.of(findOne(FIND_BY_ID_QUERY, id).orElseThrow(() -> new NotFoundException("Жанр с id = " + id + " не найден")));
+        return Optional.of(findOne(FIND_BY_ID_QUERY, id).orElseThrow(()
+                -> new NotFoundException("Жанр с id = " + id + " не найден")));
     }
 
+    // Данный метод полезен, когда в запросе передается массив из "id"
+    // Основная логика:
+    // - коллекцию "id" передаем в SQL запрос
+    // - база смотрит что ей передали {1, 2, 999}
+    // - выбирает только те что у нее есть {1, 2}
+    // - возвращает Set {1, 2}
     public Set<Integer> findExistingIds(Collection<Integer> ids) {
         return new HashSet<>(namedJdbc.queryForList(FIND_EXISTING_IDS_QUERY,
                 Map.of("ids", ids), Integer.class));
