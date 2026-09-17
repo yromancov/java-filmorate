@@ -55,8 +55,8 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     private static final String EXISTS_REVIEW_QUERY =
             "SELECT COUNT(*) FROM reviews WHERE user_id = ? AND film_id = ?";
 
-    private static final String EXISTS_LIKE_QUERY =
-            "SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND user_id = ?";
+    private static final String UPDATE_LIKE_QUERY =
+            "UPDATE review_likes SET is_useful = ? WHERE review_id = ? AND user_id = ?";
 
     public ReviewDbStorage(JdbcTemplate jdbc, RowMapper<Review> mapper) {
         super(jdbc, mapper);
@@ -89,9 +89,10 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     }
 
     @Override
-    public void delete(Long id) {
-        jdbc.update(DELETE_QUERY, id);
+    public boolean delete(Long id) {
+        boolean deleted = delete(DELETE_QUERY, id);
         log.debug("Удалён отзыв id={}", id);
+        return deleted;
     }
 
     @Override
@@ -132,8 +133,7 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
             jdbc.update(INSERT_LIKE_QUERY, reviewId, userId, isUseful);
             delta = isUseful ? 1 : -1;
         } else {
-            jdbc.update(DELETE_LIKE_QUERY, reviewId, userId);
-            jdbc.update(INSERT_LIKE_QUERY, reviewId, userId, isUseful);
+            jdbc.update(UPDATE_LIKE_QUERY, isUseful, reviewId, userId);
             delta = isUseful ? 2 : -2;
         }
 
@@ -164,12 +164,6 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     @Override
     public boolean existsByUserAndFilm(Long userId, Long filmId) {
         Integer count = jdbc.queryForObject(EXISTS_REVIEW_QUERY, Integer.class, userId, filmId);
-        return count != null && count > 0;
-    }
-
-    @Override
-    public boolean existsLike(Long reviewId, Long userId) {
-        Integer count = jdbc.queryForObject(EXISTS_LIKE_QUERY, Integer.class, reviewId, userId);
         return count != null && count > 0;
     }
 }

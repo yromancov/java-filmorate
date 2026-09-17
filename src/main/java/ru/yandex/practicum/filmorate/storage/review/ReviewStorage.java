@@ -11,7 +11,7 @@ public interface ReviewStorage {
 
     Review update(Review review);
 
-    void delete(Long id);
+    boolean delete(Long id);
 
     Optional<Review> findById(Long id);
 
@@ -25,5 +25,4 @@ public interface ReviewStorage {
 
     boolean existsByUserAndFilm(Long userId, Long filmId);
 
-    boolean existsLike(Long reviewId, Long userId);
 }

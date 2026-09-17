@@ -54,9 +54,9 @@ public class ReviewService {
     public void delete(Long id) {
         log.info("Удаление отзыва id={}", id);
 
-        validateReviewExists(id);
-
-        reviewStorage.delete(id);
+        if (!reviewStorage.delete(id)) {
+            throw new NotFoundException("Отзыв с id=" + id + " не найден");
+        }
         log.info("Отзыв id={} удалён", id);
     }
 
