@@ -16,7 +16,7 @@ import java.util.Collection;
 public class UserService {
     private final UserStorage storage;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage storage) {
+    public UserService(UserStorage storage) {
         this.storage = storage;
     }
 
