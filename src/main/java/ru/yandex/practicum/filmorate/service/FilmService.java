@@ -117,4 +117,11 @@ public class FilmService {
 
         log.info("Валидация фильма пройдена успешно");
     }
+
+    public Collection<Film> getCommonFilms(long userId, long friendId) {
+        log.info("Получен запрос GET /films/common?userId={}&friendId={}", userId, friendId);
+        userService.getUser(userId);
+        userService.getUser(friendId);
+        return storage.getCommonFilms(userId, friendId);
+    }
 }

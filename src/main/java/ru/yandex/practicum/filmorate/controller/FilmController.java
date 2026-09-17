@@ -20,6 +20,12 @@ public class FilmController {
         return service.findAll();
     }
 
+    @GetMapping("/common")
+    public Collection<Film> getCommonFilms(@RequestParam long userId,
+                                           @RequestParam long friendId) {
+        return service.getCommonFilms(userId, friendId);
+    }
+    
     @GetMapping("/{id}")
     public Film getFilm(@PathVariable long id) {
         return service.getFilm(id);
