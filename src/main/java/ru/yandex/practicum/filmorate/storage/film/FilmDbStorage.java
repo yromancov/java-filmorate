@@ -100,6 +100,16 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "WHERE fd.director_id = ? " +
                     "ORDER BY f.releaseDate, f.film_id";
 
+    private static final String FIND_COMMON_FILMS_QUERY =
+            "SELECT f.*, m.name AS mpa_name, COUNT(l_all.user_id) AS likes_count " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.age_rating_id = m.age_rating_id " +
+                    "JOIN likesfilms l1 ON f.film_id = l1.film_id AND l1.user_id = ? " +
+                    "JOIN likesfilms l2 ON f.film_id = l2.film_id AND l2.user_id = ? " +
+                    "LEFT JOIN likesfilms l_all ON f.film_id = l_all.film_id " +
+                    "GROUP BY f.film_id, f.title, f.description, f.releaseDate, f.duration, f.age_rating_id, m.name " +
+                    "ORDER BY likes_count DESC";
+
 
     private final RowMapper<Genre> genreMapper;
     private final RowMapper<Director> directorMapper;
@@ -110,6 +120,13 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         this.genreMapper = genreMapper;
         this.directorMapper = directorMapper;
         this.namedJdbc = new NamedParameterJdbcTemplate(jdbc);
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(long userId, long friendId) {
+        List<Film> films = findMany(FIND_COMMON_FILMS_QUERY, userId, friendId);
+        loadGenresForFilms(films);
+        return films;
     }
 
     @Override
@@ -214,9 +231,11 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 }
         );
     }
-    private void loadDirectors(Film film){
+
+    private void loadDirectors(Film film) {
         film.setDirectors(new LinkedHashSet<>(jdbc.query(FIND_DIRECTORS_QUERY, directorMapper, film.getId())));
     }
+
     private void saveDirectors(Film film) {
         if (film.getDirectors() == null) {
             return;
@@ -243,11 +262,11 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         });
     }
 
-    public Collection<Film> getPopularFilmsByDirectorId(int id, String sortBy){
-        String query = "year".equals(sortBy)?
+    public Collection<Film> getPopularFilmsByDirectorId(int id, String sortBy) {
+        String query = "year".equals(sortBy) ?
                 FIND_BY_DIRECTOR_SORTED_BY_YEAR_QUERY
                 : FIND_BY_DIRECTOR_SORTED_BY_LIKES_QUERY;
-        List<Film> films = findMany(query,id);
+        List<Film> films = findMany(query, id);
         loadGenresForFilms(films);
         loadDirectorsForFilms(films);
         return films;
