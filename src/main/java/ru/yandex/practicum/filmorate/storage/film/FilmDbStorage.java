@@ -126,6 +126,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     public Collection<Film> getCommonFilms(long userId, long friendId) {
         List<Film> films = findMany(FIND_COMMON_FILMS_QUERY, userId, friendId);
         loadGenresForFilms(films);
+        loadDirectorsForFilms(films);
         return films;
     }
 
