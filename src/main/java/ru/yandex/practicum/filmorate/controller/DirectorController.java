@@ -15,23 +15,29 @@ public class DirectorController {
     private final DirectorService service;
 
     @GetMapping
-    public Collection<Director> findAll(){
+    public Collection<Director> findAll() {
         return service.findAll();
     }
 
     @PostMapping
-    public Director add(@Valid @RequestBody Director director){
+    public Director add(@Valid @RequestBody Director director) {
         return service.add(director);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDirectorById(@PathVariable int id){service.deleteDirectorById(id);}
+    public void deleteDirectorById(@PathVariable int id) {
+        service.deleteDirectorById(id);
+    }
 
     @GetMapping("/{id}")
-    public Director findById(@PathVariable int id){return service.findById(id);}
+    public Director findById(@PathVariable int id) {
+        return service.findById(id);
+    }
 
     @PutMapping
-    public Director update(@Valid @RequestBody Director newDirector){return service.update(newDirector);}
+    public Director update(@Valid @RequestBody Director newDirector) {
+        return service.update(newDirector);
+    }
 
 
 }

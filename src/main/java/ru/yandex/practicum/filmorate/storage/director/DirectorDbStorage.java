@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.dal.BaseStorage;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.*;
+
 @Component
 public class DirectorDbStorage extends BaseStorage<Director> implements DirectorStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM directors ORDER BY director_id";
@@ -51,7 +52,7 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     }
 
     @Override
-    public Director add(Director director){
+    public Director add(Director director) {
         int id = Math.toIntExact(insert(
                 INSERT_QUERY,
                 director.getName()
@@ -75,7 +76,7 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
         return super.delete(
                 DELETE_QUERY,
                 id
-                );
+        );
     }
 
 }

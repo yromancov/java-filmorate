@@ -36,9 +36,10 @@ public class DirectorService {
                 new NotFoundException("Режиссер с Id " + id + " не найден."));
 
     }
-    public Director update(Director newDirector){
+
+    public Director update(Director newDirector) {
         log.info("Получен запрос PUT /dorectors");
-        if (newDirector.getId() == null){
+        if (newDirector.getId() == null) {
             throw new ValidationException("Id должен быть указан");
         }
         findById(newDirector.getId());
@@ -47,9 +48,9 @@ public class DirectorService {
         return updated;
     }
 
-    public void deleteDirectorById(int id){
-        log.info("Получен запрос DELETE /directors/{}",id);
-        if (!storage.deleteDirectorById(id)){
+    public void deleteDirectorById(int id) {
+        log.info("Получен запрос DELETE /directors/{}", id);
+        if (!storage.deleteDirectorById(id)) {
             throw new NotFoundException("Режиссёр с id = " + id + " не найден");
 
         }
