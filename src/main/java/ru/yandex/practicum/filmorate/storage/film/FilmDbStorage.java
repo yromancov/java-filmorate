@@ -79,6 +79,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     private static final String DELETE_DIRECTORS_QUERY =
             "DELETE FROM film_director WHERE film_id = ?";
+
     private static final String FIND_BY_DIRECTOR_SORTED_BY_LIKES_QUERY =
             "SELECT f.*, m.name AS mpa_name, COUNT(l.user_id) AS likes_count " +
                     "FROM films f " +
@@ -237,6 +238,16 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         namedJdbc.query(FIND_DIRECTORS_FOR_FILMS_QUERY, Map.of("ids", byId.keySet()), rs -> {
             byId.get(rs.getLong("film_id")).getDirectors().add(directorMapper.mapRow(rs, 0));
         });
+    }
+
+    public Collection<Film> getPopularFilmsByDirectorId(int id, String sortBy){
+        String query = "year".equals(sortBy)?
+                FIND_BY_DIRECTOR_SORTED_BY_YEAR_QUERY
+                : FIND_BY_DIRECTOR_SORTED_BY_LIKES_QUERY;
+        List<Film> films = findMany(query,id);
+        loadGenresForFilms(films);
+        loadDirectorsForFilms(films);
+        return films;
     }
 
 }

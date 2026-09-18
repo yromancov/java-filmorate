@@ -9,14 +9,18 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -33,13 +37,14 @@ public class FilmControllerTest {
     void setUp() {
         FilmStorage filmStorage = Mockito.mock(FilmStorage.class);
         UserService userService = Mockito.mock(UserService.class);
-        MpaDbStorage mpaStorage = Mockito.mock(MpaDbStorage.class);
-        GenreDbStorage genreStorage = Mockito.mock(GenreDbStorage.class);
+        MpaDbStorage mpaDbStorage = Mockito.mock(MpaDbStorage.class);
+        GenreDbStorage genreDbStorage = Mockito.mock(GenreDbStorage.class);
+        DirectorStorage directorStorage = Mockito.mock(DirectorStorage.class);
 
-        when(mpaStorage.findById(anyInt())).thenReturn(Optional.of(new Mpa()));
+        when(mpaDbStorage.findById(anyInt())).thenReturn(Optional.of(new Mpa()));
         when(filmStorage.add(any(Film.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        filmService = new FilmService(filmStorage, userService, mpaStorage, genreStorage);
+        filmService = new FilmService(filmStorage, userService, mpaDbStorage, genreDbStorage,directorStorage);
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();

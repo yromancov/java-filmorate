@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
@@ -26,15 +27,17 @@ public class FilmService {
     private final UserService userService;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
 
     public FilmService(FilmStorage storage,
                        UserService userService,
                        MpaDbStorage mpaStorage,
-                       GenreDbStorage genreStorage) {
+                       GenreDbStorage genreStorage, DirectorStorage directorStorage) {
         this.storage = storage;
         this.userService = userService;
         this.mpaStorage = mpaStorage;
         this.genreStorage = genreStorage;
+        this.directorStorage = directorStorage;
     }
 
     public Collection<Film> findAll() {
@@ -116,5 +119,13 @@ public class FilmService {
         }
 
         log.info("Валидация фильма пройдена успешно");
+    }
+    public Collection<Film> getPopularFilmsByDirectorId(int id, String sortBy){
+        log.info("Получен запрос GET /films/director/{}?sortBy={}",id,sortBy);
+        directorStorage.findById(id).orElseThrow(() -> new NotFoundException("Режиссёр с id = " + id + " не найден"));
+        if (!"year".equals(sortBy) && !"likes".equals(sortBy)){
+            throw new ValidationException("Недопустимое значение sortBy: " + sortBy);
+        }
+        return storage.getPopularFilmsByDirectorId(id,sortBy);
     }
 }
