@@ -29,6 +29,7 @@ public class Film {
     @Positive
     private int duration;
     private Set<Genre> genres = new LinkedHashSet<>();
+    private Set<Director> directors = new LinkedHashSet<>();
     @NotNull
     private Mpa mpa;
 }
