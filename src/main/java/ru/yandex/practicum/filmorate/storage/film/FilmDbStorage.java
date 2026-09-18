@@ -69,6 +69,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "LIMIT ?";
     private static final String EXISTS_LIKE_QUERY =
             "SELECT COUNT(*) FROM likesfilms WHERE film_id = ? AND user_id = ?";
+    private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE film_id = ?";
 
     private static final String FIND_DIRECTORS_QUERY =
             "SELECT d.* FROM directors d " +
@@ -110,6 +111,10 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "GROUP BY f.film_id, f.title, f.description, f.releaseDate, f.duration, f.age_rating_id, m.name " +
                     "ORDER BY likes_count DESC";
 
+    @Override
+    public boolean delete(long id) {
+        return super.delete(DELETE_FILM_QUERY, id);
+    }
 
     private final RowMapper<Genre> genreMapper;
     private final RowMapper<Director> directorMapper;

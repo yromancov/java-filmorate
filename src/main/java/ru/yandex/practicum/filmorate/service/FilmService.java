@@ -91,6 +91,14 @@ public class FilmService {
         return saved;
     }
 
+    public void delete(long id) {
+        log.info("Получен запрос DELETE /films/{}", id);
+        if (!storage.delete(id)) {
+            throw new NotFoundException("Фильм с id = " + id + " не найден");
+        }
+        log.info("Фильм с id={} успешно удалён", id);
+    }
+
     public void validateFilm(Film film) {
         log.info("Запуск валидации фильма");
 

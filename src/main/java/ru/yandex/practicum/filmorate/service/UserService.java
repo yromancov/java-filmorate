@@ -76,6 +76,14 @@ public class UserService {
         return updated;
     }
 
+    public void delete(long id) {
+        log.info("Получен запрос DELETE /users/{}", id);
+        if (!storage.delete(id)) {
+            throw new NotFoundException("Пользователь с ID " + id + " не найден.");
+        }
+        log.info("Пользователь с id={} успешно удален", id);
+    }
+
     private void checkEmailNotTaken(String email, Long excludeUserId) {
         String normalized = email.toLowerCase();
         boolean taken = storage.findAll().stream()
