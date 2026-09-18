@@ -39,6 +39,9 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     private static final String INSERT_GENRE_QUERY =
             "INSERT INTO film_genre(film_id, genre_id) VALUES (?, ?)";
 
+    private static final String INSERT_DIRECTOR_QUERY =
+            "INSERT INTO film_director(film_id, director_id) VALUES (?, ?)";
+
     private static final String FIND_GENRES_QUERY =
             "SELECT g.* FROM genre g " +
                     "JOIN film_genre fg ON g.genre_id = fg.genre_id " +
@@ -74,7 +77,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     private static final String FIND_DIRECTORS_FOR_FILMS_QUERY =
             "SELECT fd.film_id, d.* FROM directors d " +
-                    "JOIN film_director fg ON d.director_id = fd.director_id " +
+                    "JOIN film_director fd ON d.director_id = fd.director_id " +
                     "WHERE fd.film_id IN (:ids) ORDER BY d.director_id";
 
     private static final String DELETE_DIRECTORS_QUERY =
@@ -219,7 +222,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
             return;
         }
         List<Director> directors = List.copyOf(film.getDirectors());
-        jdbc.batchUpdate(INSERT_GENRE_QUERY,
+        jdbc.batchUpdate(INSERT_DIRECTOR_QUERY,
                 directors, directors.size(),
                 (PreparedStatement ps, Director director) -> {
                     ps.setLong(1, film.getId());

@@ -18,7 +18,7 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     private static final String INSERT_QUERY =
             "INSERT INTO directors(name) VALUES (?)";
     private static final String UPDATE_QUERY =
-            "UPDATE users SET name = ?, WHERE director_id = ?";
+            "UPDATE directors SET name = ?, WHERE director_id = ?";
     private static final String DELETE_QUERY =
             "DELETE from directors WHERE director_id = ?";
 
@@ -40,8 +40,8 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
 
     @Override
     public Optional<Director> findById(int id) {
-        return Optional.of(findOne(FIND_BY_ID_QUERY, id).orElseThrow(()
-                -> new NotFoundException("Директор с id = " + id + " не найден")));
+        return findOne(FIND_BY_ID_QUERY, id);
+
     }
 
     @Override
