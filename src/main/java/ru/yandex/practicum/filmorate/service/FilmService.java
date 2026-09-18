@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
@@ -105,16 +107,25 @@ public class FilmService {
         mpaStorage.findById(film.getMpa().getId()).orElseThrow(() ->
                 new NotFoundException("Рейтинг с id = " + film.getMpa().getId() + " не найден"));
 
-        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
-            Set<Integer> requested = film.getGenres().stream()
+        if (film.getGenres() != null && !film.getGenres().isEmpty() && film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            Set<Integer> requestedGnr = film.getGenres().stream()
                     .map(Genre::getId)
                     .collect(Collectors.toSet());
+            Set<Integer> requestedDir = film.getDirectors().stream()
+                    .map(Director::getId)
+                    .collect(Collectors.toSet());
 
-            Set<Integer> missing = new HashSet<>(requested);
-            missing.removeAll(genreStorage.findExistingIds(requested));
+            Set<Integer> missingGnr = new HashSet<>(requestedGnr);
+            Set<Integer> missingDir = new HashSet<>(requestedDir);
+            missingGnr.removeAll(genreStorage.findExistingIds(requestedGnr));
+            missingDir.removeAll(directorStorage.findExistingIds(requestedDir));
 
-            if (!missing.isEmpty()) {
-                throw new NotFoundException("Жанр с id = " + missing.iterator().next() + " не найден");
+
+            if (!missingGnr.isEmpty()) {
+                throw new NotFoundException("Жанр с id = " + missingGnr.iterator().next() + " не найден");
+            } else if (!missingDir.isEmpty()){
+                throw new NotFoundException("Режисер с id = " + missingDir.iterator().next() + " не найден");
+
             }
         }
 

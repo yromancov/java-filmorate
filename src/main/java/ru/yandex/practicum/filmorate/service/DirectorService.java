@@ -26,19 +26,19 @@ public class DirectorService {
     public Director add(Director director) {
         log.info("Получен запрос POST /directors");
         Director saved = storage.add(director);
-        log.info("Пользователь с id={} успешно добавлен", saved.getId());
+        log.info("Режиссер с id={} успешно добавлен", saved.getId());
         return saved;
     }
 
-    public Director findById(long id) {
-        return storage.findById((int) id).orElseThrow(() ->
+    public Director findById(int id) {
+        log.info("Получен запрос GET /directors/{}", id);
+        return storage.findById(id).orElseThrow(() ->
                 new NotFoundException("Режиссер с Id " + id + " не найден."));
 
     }
     public Director update(Director newDirector){
         log.info("Получен запрос PUT /dorectors");
-        if (newDirector.getId() == 0){
-            log.warn("Обновление невозможно: Id режиccера не указан");
+        if (newDirector.getId() == null){
             throw new ValidationException("Id должен быть указан");
         }
         findById(newDirector.getId());

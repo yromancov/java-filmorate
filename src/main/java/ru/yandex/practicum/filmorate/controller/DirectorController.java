@@ -28,7 +28,7 @@ public class DirectorController {
     public void deleteDirectorById(@PathVariable int id){service.deleteDirectorById(id);}
 
     @GetMapping("/{id}")
-    public Director findById(@PathVariable long id){return service.findById(id);}
+    public Director findById(@PathVariable int id){return service.findById(id);}
 
     @PutMapping
     public Director update(@Valid @RequestBody Director newDirector){return service.update(newDirector);}

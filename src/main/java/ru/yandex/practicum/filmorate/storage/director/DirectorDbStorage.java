@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dal.BaseStorage;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.*;
@@ -18,7 +17,7 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     private static final String INSERT_QUERY =
             "INSERT INTO directors(name) VALUES (?)";
     private static final String UPDATE_QUERY =
-            "UPDATE directors SET name = ?, WHERE director_id = ?";
+            "UPDATE directors SET name = ? WHERE director_id = ?";
     private static final String DELETE_QUERY =
             "DELETE from directors WHERE director_id = ?";
 
