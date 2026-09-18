@@ -112,8 +112,8 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "ORDER BY likes_count DESC";
 
     @Override
-    public void delete(long id) {
-        jdbc.update(DELETE_FILM_QUERY, id);
+    public boolean delete(long id) {
+        return super.delete(DELETE_FILM_QUERY, id);
     }
 
     private final RowMapper<Genre> genreMapper;

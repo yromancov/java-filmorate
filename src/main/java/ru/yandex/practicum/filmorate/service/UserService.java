@@ -78,8 +78,9 @@ public class UserService {
 
     public void delete(long id) {
         log.info("Получен запрос DELETE /users/{}", id);
-        getUser(id);
-        storage.delete(id);
+        if (!storage.delete(id)) {
+            throw new NotFoundException("Пользователь с ID " + id + " не найден.");
+        }
         log.info("Пользователь с id={} успешно удален", id);
     }
 

@@ -93,8 +93,9 @@ public class FilmService {
 
     public void delete(long id) {
         log.info("Получен запрос DELETE /films/{}", id);
-        getFilm(id);
-        storage.delete(id);
+        if (!storage.delete(id)) {
+            throw new NotFoundException("Фильм с id = " + id + " не найден");
+        }
         log.info("Фильм с id={} успешно удалён", id);
     }
 
