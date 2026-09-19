@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.exception.DuplicateUserException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -14,9 +16,11 @@ import java.util.Collection;
 @Slf4j
 public class UserService {
     private final UserStorage storage;
+    private final FilmStorage filmStorage;
 
-    public UserService(UserStorage storage) {
+    public UserService(UserStorage storage, FilmStorage filmStorage) {
         this.storage = storage;
+        this.filmStorage = filmStorage;
     }
 
     public Collection<User> findAll() {
@@ -113,4 +117,9 @@ public class UserService {
 
     }
 
+    public Collection<Film> getRecommendations(long userId) {
+        log.info("Получен запрос GET /users/{}/recommendations", userId);
+        getUser(userId);
+        return filmStorage.getRecommendations(userId);
+    }
 }

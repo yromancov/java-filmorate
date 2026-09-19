@@ -154,9 +154,4 @@ public class FilmService {
         return storage.getCommonFilms(userId, friendId);
     }
 
-    public Collection<Film> getRecommendations(long userId) {
-        log.info("Получен запрос GET /users/{}/recommendations", userId);
-        userService.getUser(userId);
-        return storage.getRecommendations(userId);
-    }
 }
