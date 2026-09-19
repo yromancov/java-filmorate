@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FilmDbStorageTests {
 
     private final FilmDbStorage filmStorage;
+
     @Autowired
     FilmDbStorageTests(FilmDbStorage filmStorage) {
         this.filmStorage = filmStorage;

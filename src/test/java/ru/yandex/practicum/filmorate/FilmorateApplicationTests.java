@@ -18,6 +18,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Import({UserDbStorage.class, UserRowMap.class})
 class FilmorateApplicationTests {
     private final UserDbStorage userStorage;
+
     @Autowired
     FilmorateApplicationTests(UserDbStorage userStorage) {
         this.userStorage = userStorage;

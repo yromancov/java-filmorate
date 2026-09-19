@@ -24,6 +24,7 @@ class DictionaryStoragesTests {
 
     private final MpaDbStorage mpaStorage;
     private final GenreDbStorage genreStorage;
+
     @Autowired
     DictionaryStoragesTests(MpaDbStorage mpaStorage, GenreDbStorage genreStorage) {
         this.mpaStorage = mpaStorage;

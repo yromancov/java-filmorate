@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UserDbStorageTests {
 
     private final UserDbStorage userStorage;
+
     @Autowired
     UserDbStorageTests(UserDbStorage userStorage) {
         this.userStorage = userStorage;
