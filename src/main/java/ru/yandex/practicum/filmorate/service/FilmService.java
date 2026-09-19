@@ -153,4 +153,9 @@ public class FilmService {
         userService.getUser(friendId);
         return storage.getCommonFilms(userId, friendId);
     }
+
+    public Collection<Film> searchByTitleOrDirectors(String query, String by){
+        log.info("Получен GET запрос /films/search?query={}&by={}",query,by);
+        return storage.searchByTitleOrDirector(query,by);
+    }
 }

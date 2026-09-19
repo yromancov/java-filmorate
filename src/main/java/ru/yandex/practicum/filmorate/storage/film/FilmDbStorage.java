@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dal.BaseStorage;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -110,6 +111,42 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "LEFT JOIN likesfilms l_all ON f.film_id = l_all.film_id " +
                     "GROUP BY f.film_id, f.title, f.description, f.releaseDate, f.duration, f.age_rating_id, m.name " +
                     "ORDER BY likes_count DESC";
+
+    private static final String FIND_FILMS_BY_TITLE =
+            "SELECT f.*, m.name AS mpa_name, COUNT(DISTINCT l.user_id) AS likes_count " +
+                    "FROM films f " +
+                    "LEFT JOIN film_director fd ON f.film_id = fd.film_id " +
+                    "LEFT JOIN mpa m ON f.age_rating_id = m.age_rating_id " +
+                    "LEFT JOIN likesfilms l ON f.film_id = l.film_id " +
+                    "LEFT JOIN directors d ON fd.director_id = d.director_id " +
+                    "WHERE LOWER(f.title) LIKE ? " +
+                    "GROUP BY f.film_id, f.title, f.description, f.releaseDate, " +
+                    "f.duration, f.age_rating_id, m.name " +
+                    "ORDER BY likes_count DESC, f.film_id";
+
+    private static final String FIND_FILMS_BY_DIRECTOR =
+            "SELECT f.*, m.name AS mpa_name, COUNT(DISTINCT l.user_id) AS likes_count " +
+                    "FROM films f " +
+                    "LEFT JOIN film_director fd ON f.film_id = fd.film_id " +
+                    "LEFT JOIN mpa m ON f.age_rating_id = m.age_rating_id " +
+                    "LEFT JOIN likesfilms l ON f.film_id = l.film_id " +
+                    "LEFT JOIN directors d ON fd.director_id = d.director_id " +
+                    "WHERE LOWER(d.name) LIKE ? " +
+                    "GROUP BY f.film_id, f.title, f.description, f.releaseDate, " +
+                    "f.duration, f.age_rating_id, m.name " +
+                    "ORDER BY likes_count DESC, f.film_id";
+
+    private static final String FIND_FILM_BY_TITLE_AND_DIRECTOR =
+            "SELECT f.*, m.name AS mpa_name, COUNT(DISTINCT l.user_id) AS likes_count " +
+                    "FROM films f " +
+                    "LEFT JOIN film_director fd ON f.film_id = fd.film_id " +
+                    "LEFT JOIN mpa m ON f.age_rating_id = m.age_rating_id " +
+                    "LEFT JOIN likesfilms l ON f.film_id = l.film_id " +
+                    "LEFT JOIN directors d ON fd.director_id = d.director_id " +
+                    "WHERE LOWER(f.title) LIKE ? OR LOWER(d.name) LIKE ? " +
+                    "GROUP BY f.film_id, f.title, f.description, f.releaseDate, " +
+                    "f.duration, f.age_rating_id, m.name " +
+                    "ORDER BY likes_count DESC, f.film_id";
 
     @Override
     public boolean delete(long id) {
@@ -275,6 +312,31 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         loadGenresForFilms(films);
         loadDirectorsForFilms(films);
         return films;
+    }
+
+    public Collection<Film> searchByTitleOrDirector(String query, String by) {
+        String pattern = "%" + query.toLowerCase() + "%";
+        Set<String> parts = Arrays.stream(by.toLowerCase().split(","))
+                .map(String::trim)
+                .collect(Collectors.toSet());
+        boolean byTitle = parts.contains("title");
+        boolean byDirector = parts.contains("director");
+
+        if (!byTitle && !byDirector) {
+            throw new ValidationException("Параметр by должен содеражть title и/или director");
+        }
+        List<Film> films = List.of();
+        if (byTitle && byDirector) {
+            films = findMany(FIND_FILM_BY_TITLE_AND_DIRECTOR, pattern , pattern);
+        } else if (byTitle) {
+            films = findMany(FIND_FILMS_BY_TITLE, pattern);
+        } else if (byDirector) {
+            films = findMany(FIND_FILMS_BY_DIRECTOR, pattern);
+        }
+        loadGenresForFilms(films);
+        loadDirectorsForFilms(films);
+        return films;
+
     }
 
 }
