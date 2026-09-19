@@ -58,6 +58,32 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "JOIN film_genre fg ON g.genre_id = fg.genre_id " +
                     "WHERE fg.film_id IN (:ids) ORDER BY g.genre_id";
 
+    private static final String FIND_SIMILAR_QUERY =
+            "SELECT l2.user_id FROM likesfilms l2 " +
+                    "WHERE l2.film_id IN (SELECT film_id FROM likesfilms WHERE user_id = ?) " +
+                    "  AND l2.user_id <> ? " +
+                    "GROUP BY l2.user_id " +
+                    "HAVING COUNT(*) = ( " +
+                    "    SELECT MAX(cnt) FROM ( " +
+                    "        SELECT COUNT(*) AS cnt FROM likesfilms l3 " +
+                    "        WHERE l3.film_id IN (SELECT film_id FROM likesfilms WHERE user_id = ?) " +
+                    "          AND l3.user_id <> ? " +
+                    "        GROUP BY l3.user_id " +
+                    "    ) " +
+                    ")";
+
+    private static final String FIND_RECOMMENDATIONS_BY_USERS_QUERY =
+            "SELECT f.*, m.name AS mpa_name, COUNT(l_all.user_id) AS likes_count " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.age_rating_id = m.age_rating_id " +
+                    "LEFT JOIN likesfilms l_all ON f.film_id = l_all.film_id " +
+                    "WHERE f.film_id IN ( " +
+                    "    SELECT l.film_id FROM likesfilms l " +
+                    "    WHERE l.user_id IN (:userIds) " +
+                    "      AND l.film_id NOT IN (SELECT film_id FROM likesfilms WHERE user_id = :userId) " +
+                    ") " +
+                    "GROUP BY f.film_id, f.title, f.description, f.releaseDate, f.duration, f.age_rating_id, m.name " +
+                    "ORDER BY likes_count DESC";
 
     private static final String FIND_POPULAR_QUERY =
             "SELECT f.*, m.name AS mpa_name, COUNT(l.user_id) AS likes_count " +
@@ -128,9 +154,36 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getRecommendations(long userId) {
+        List<Long> similarUsers = jdbc.queryForList(
+                FIND_SIMILAR_QUERY, Long.class, userId, userId, userId, userId
+        );
+
+        if (similarUsers.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, Object> params = Map.of(
+                "userIds", similarUsers,
+                "userId", userId
+        );
+
+        List<Film> films = namedJdbc.query(
+                FIND_RECOMMENDATIONS_BY_USERS_QUERY,
+                params,
+                mapper
+        );
+
+        loadGenresForFilms(films);
+        loadDirectorsForFilms(films);
+        return films;
+    }
+
+    @Override
     public Collection<Film> getCommonFilms(long userId, long friendId) {
         List<Film> films = findMany(FIND_COMMON_FILMS_QUERY, userId, friendId);
         loadGenresForFilms(films);
+        loadDirectorsForFilms(films);
         return films;
     }
 

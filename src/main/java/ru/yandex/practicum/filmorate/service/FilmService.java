@@ -153,4 +153,5 @@ public class FilmService {
         userService.getUser(friendId);
         return storage.getCommonFilms(userId, friendId);
     }
+
 }
