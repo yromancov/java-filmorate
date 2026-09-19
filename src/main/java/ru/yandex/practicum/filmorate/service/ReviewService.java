@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
@@ -20,6 +22,7 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final FeedService feedService;
 
     public Review add(Review review) {
         log.info("Добавление отзыва: user={}, film={}",
@@ -33,6 +36,7 @@ public class ReviewService {
         }
 
         Review saved = reviewStorage.add(review);
+        feedService.addEvent(saved.getUserId(), EventType.REVIEW, Operation.ADD, saved.getReviewId());
         log.info("Отзыв создан с id={}", saved.getReviewId());
         return saved;
     }
@@ -47,6 +51,7 @@ public class ReviewService {
         validateReviewExists(review.getReviewId());
 
         Review updated = reviewStorage.update(review);
+        feedService.addEvent(updated.getUserId(), EventType.REVIEW, Operation.UPDATE, updated.getReviewId());
         log.info("Отзыв id={} обновлён", updated.getReviewId());
         return updated;
     }
@@ -54,9 +59,11 @@ public class ReviewService {
     public void delete(Long id) {
         log.info("Удаление отзыва id={}", id);
 
-        if (!reviewStorage.delete(id)) {
-            throw new NotFoundException("Отзыв с id=" + id + " не найден");
-        }
+        Review review = reviewStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв с id=" + id + " не найден"));
+
+        reviewStorage.delete(id);
+        feedService.addEvent(review.getUserId(), EventType.REVIEW, Operation.REMOVE, id);
         log.info("Отзыв id={} удалён", id);
     }
 
