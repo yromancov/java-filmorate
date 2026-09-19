@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -20,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @AutoConfigureTestDatabase
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({
         FilmDbStorage.class,
         UserDbStorage.class,
@@ -33,6 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FilmDbStorageTests {
 
     private final FilmDbStorage filmStorage;
+    @Autowired
+    FilmDbStorageTests(FilmDbStorage filmStorage) {
+        this.filmStorage = filmStorage;
+    }
 
     @Test
     public void testGetFilm_ShouldReturnMatrixFromDataSql() {

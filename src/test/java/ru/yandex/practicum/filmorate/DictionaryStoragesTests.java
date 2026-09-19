@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -20,12 +19,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @AutoConfigureTestDatabase
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({MpaDbStorage.class, GenreDbStorage.class, MpaRowMap.class, GenreRowMap.class})
 class DictionaryStoragesTests {
 
     private final MpaDbStorage mpaStorage;
     private final GenreDbStorage genreStorage;
+    @Autowired
+    DictionaryStoragesTests(MpaDbStorage mpaStorage, GenreDbStorage genreStorage) {
+        this.mpaStorage = mpaStorage;
+        this.genreStorage = genreStorage;
+    }
 
     @Test
     public void testFindAllMpa() {
