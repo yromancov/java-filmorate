@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -154,8 +155,17 @@ public class FilmService {
         return storage.getCommonFilms(userId, friendId);
     }
 
-    public Collection<Film> searchByTitleOrDirectors(String query, String by){
-        log.info("Получен GET запрос /films/search?query={}&by={}",query,by);
-        return storage.searchByTitleOrDirector(query,by);
+    public Collection<Film> searchByTitleOrDirector(String query, String by) {
+        log.info("Получен GET запрос /films/search?query={}&by={}", query, by);
+        Set<String> parts = Arrays.stream(by.toLowerCase().split(","))
+                .map(String::trim)
+                .collect(Collectors.toSet());
+        boolean byTitle = parts.contains("title");
+        boolean byDirector = parts.contains("director");
+
+        if (!byTitle && !byDirector) {
+            throw new ValidationException("Параметр by должен содеражть title и/или director");
+        }
+        return storage.searchByTitleOrDirector(query, byTitle, byDirector);
     }
 }

@@ -303,7 +303,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
             byId.get(rs.getLong("film_id")).getDirectors().add(directorMapper.mapRow(rs, 0));
         });
     }
-
+    @Override
     public Collection<Film> getPopularFilmsByDirectorId(int id, String sortBy) {
         String query = "year".equals(sortBy) ?
                 FIND_BY_DIRECTOR_SORTED_BY_YEAR_QUERY
@@ -313,21 +313,12 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         loadDirectorsForFilms(films);
         return films;
     }
-
-    public Collection<Film> searchByTitleOrDirector(String query, String by) {
+    @Override
+    public Collection<Film> searchByTitleOrDirector(String query, boolean byTitle, boolean byDirector) {
         String pattern = "%" + query.toLowerCase() + "%";
-        Set<String> parts = Arrays.stream(by.toLowerCase().split(","))
-                .map(String::trim)
-                .collect(Collectors.toSet());
-        boolean byTitle = parts.contains("title");
-        boolean byDirector = parts.contains("director");
-
-        if (!byTitle && !byDirector) {
-            throw new ValidationException("Параметр by должен содеражть title и/или director");
-        }
         List<Film> films = List.of();
         if (byTitle && byDirector) {
-            films = findMany(FIND_FILM_BY_TITLE_AND_DIRECTOR, pattern , pattern);
+            films = findMany(FIND_FILM_BY_TITLE_AND_DIRECTOR, pattern, pattern);
         } else if (byTitle) {
             films = findMany(FIND_FILMS_BY_TITLE, pattern);
         } else if (byDirector) {
