@@ -45,9 +45,10 @@ public class UserService {
     public void addFriend(long id, long friendId) {
         getUser(id);
         getUser(friendId);
-        storage.addFriend(id, friendId);
-        feedService.addEvent(id, EventType.FRIEND, Operation.ADD, friendId);
-        log.info("Пользователь id={} добавил в друзья id={}", id, friendId);
+        if (storage.addFriend(id, friendId)) {
+            feedService.addEvent(id, EventType.FRIEND, Operation.ADD, friendId);
+            log.info("Пользователь id={} добавил в друзья id={}", id, friendId);
+        }
     }
 
     public Collection<User> getFriends(long id) {
@@ -59,9 +60,10 @@ public class UserService {
     public void deleteFriendById(long id, long friendId) {
         getUser(id);
         getUser(friendId);
-        storage.deleteFriend(id, friendId);
-        feedService.addEvent(id, EventType.FRIEND, Operation.REMOVE, friendId);
-        log.info("Пользователь id={} удалил из друзей id={}", id, friendId);
+        if (storage.deleteFriend(id, friendId)) {
+            feedService.addEvent(id, EventType.FRIEND, Operation.REMOVE, friendId);
+            log.info("Пользователь id={} удалил из друзей id={}", id, friendId);
+        }
     }
 
     public Collection<User> getCommonFriends(long id, long otherId) {

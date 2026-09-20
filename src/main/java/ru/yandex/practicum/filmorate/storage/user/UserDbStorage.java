@@ -94,9 +94,9 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     }
 
     @Override
-    public void addFriend(long id, long friendId) {
+    public boolean addFriend(long id, long friendId) {
         if (hasRow(id, friendId)) {
-            return;
+            return false;
         }
         boolean mutual = hasRow(friendId, id);
 
@@ -106,12 +106,16 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
         if (mutual) {
             jdbc.update(UPDATE_STATUS_QUERY, StatusFriend.CONFIRM.name(), friendId, id);
         }
+        return true;
     }
 
     @Override
-    public void deleteFriend(long id, long friendId) {
-        jdbc.update(DELETE_FRIEND_QUERY, id, friendId);
-        jdbc.update(UPDATE_STATUS_QUERY, StatusFriend.NOT_CONFIRM.name(), friendId, id);
+    public boolean deleteFriend(long id, long friendId) {
+        int deleted = jdbc.update(DELETE_FRIEND_QUERY, id, friendId);
+        if (deleted > 0) {
+            jdbc.update(UPDATE_STATUS_QUERY, StatusFriend.NOT_CONFIRM.name(), friendId, id);
+        }
+        return deleted > 0;
     }
 
     private boolean hasRow(long from, long to) {

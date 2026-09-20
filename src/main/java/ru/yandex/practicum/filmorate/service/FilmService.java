@@ -42,9 +42,10 @@ public class FilmService {
     public void addLike(long id, long userId) {
         getFilm(id);
         userService.getUser(userId);
-        storage.addLike(id, userId);
-        feedService.addEvent(userId, EventType.LIKE, Operation.ADD, id);
-        log.info("Пользователь с id={} поставил лайк фильму с id={}", userId, id);
+        if (storage.addLike(id, userId)) {
+            feedService.addEvent(userId, EventType.LIKE, Operation.ADD, id);
+            log.info("Пользователь с id={} поставил лайк фильму с id={}", userId, id);
+        }
 
 
     }
@@ -52,12 +53,13 @@ public class FilmService {
     public void deleteLike(long id, long userId) {
         getFilm(id);
         userService.getUser(userId);
-        storage.deleteLike(id, userId);
-        feedService.addEvent(userId, EventType.LIKE, Operation.REMOVE, id);
-        log.info("Пользователь с id={} удалил лайк фильму с id={}", userId, id);
+        if (storage.deleteLike(id, userId)) {
+            feedService.addEvent(userId, EventType.LIKE, Operation.REMOVE, id);
+            log.info("Пользователь с id={} удалил лайк фильму с id={}", userId, id);
+        }
     }
 
-    public Collection<Film> listOfTopFilmsByCount(long count ,Integer genreId, Integer year) {
+    public Collection<Film> listOfTopFilmsByCount(long count, Integer genreId, Integer year) {
         return storage.getPopular(count, genreId, year);
     }
 
