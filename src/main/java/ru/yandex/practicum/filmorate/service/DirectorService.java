@@ -38,7 +38,7 @@ public class DirectorService {
     }
 
     public Director update(Director newDirector) {
-        log.info("Получен запрос PUT /dorectors");
+        log.info("Получен запрос PUT /directors");
         if (newDirector.getId() == null) {
             throw new ValidationException("Id должен быть указан");
         }

@@ -46,7 +46,6 @@ public class FilmService {
         feedService.addEvent(userId, EventType.LIKE, Operation.ADD, id);
         log.info("Пользователь с id={} поставил лайк фильму с id={}", userId, id);
 
-
     }
 
     public void deleteLike(long id, long userId) {
@@ -55,10 +54,11 @@ public class FilmService {
         storage.deleteLike(id, userId);
         feedService.addEvent(userId, EventType.LIKE, Operation.REMOVE, id);
         log.info("Пользователь с id={} удалил лайк фильму с id={}", userId, id);
+
     }
 
-    public Collection<Film> listOfTopFilmsByCount(long count) {
-        return storage.getPopular(count);
+    public Collection<Film> listOfTopFilmsByCount(long count, Integer genreId, Integer year) {
+        return storage.getPopular(count, genreId, year);
     }
 
     public Film add(Film film) {

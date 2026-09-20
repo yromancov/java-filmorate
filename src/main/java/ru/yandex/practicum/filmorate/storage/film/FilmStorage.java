@@ -14,11 +14,11 @@ public interface FilmStorage {
 
     Optional<Film> getFilm(long id);
 
-    void addLike(long filmId, long userId);
+    boolean addLike(long filmId, long userId);
 
-    void deleteLike(long filmId, long userId);
+    boolean deleteLike(long filmId, long userId);
 
-    Collection<Film> getPopular(long count);
+    Collection<Film> getPopular(long count, Integer genreId, Integer year);
 
     Collection<Film> getPopularFilmsByDirectorId(int id, String sortBy);
 
