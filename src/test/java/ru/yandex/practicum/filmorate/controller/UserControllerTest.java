@@ -7,6 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -29,8 +30,9 @@ class UserControllerTest {
     void setUp() {
         UserStorage userStorage = Mockito.mock(UserStorage.class);
         when(userStorage.add(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+        FeedService feedService = Mockito.mock(FeedService.class);
         FilmStorage filmStorage = Mockito.mock(FilmStorage.class);
-        userService = new UserService(userStorage, filmStorage);
+        userService = new UserService(userStorage, filmStorage, feedService);
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
 

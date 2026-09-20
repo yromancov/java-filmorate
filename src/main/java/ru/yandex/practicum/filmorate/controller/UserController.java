@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.*;
@@ -15,6 +17,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService service;
+    private final FeedService feedService;
 
     @GetMapping
     public Collection<User> findAll() {
@@ -68,4 +71,8 @@ public class UserController {
         service.delete(userId);
     }
 
+    @GetMapping("/{id}/feed")
+    public List<Event> getFeed(@PathVariable Long id) {
+        return feedService.getFeed(id);
+    }
 }

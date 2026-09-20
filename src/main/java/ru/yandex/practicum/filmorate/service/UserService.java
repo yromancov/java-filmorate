@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.exception.DuplicateUserException;
@@ -14,14 +17,11 @@ import java.util.Collection;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage storage;
     private final FilmStorage filmStorage;
-
-    public UserService(UserStorage storage, FilmStorage filmStorage) {
-        this.storage = storage;
-        this.filmStorage = filmStorage;
-    }
+    private final FeedService feedService;
 
     public Collection<User> findAll() {
         log.info("Получен запрос GET /users");
@@ -46,9 +46,12 @@ public class UserService {
         getUser(id);
         getUser(friendId);
         storage.addFriend(id, friendId);
+        feedService.addEvent(id, EventType.FRIEND, Operation.ADD, friendId);
+        log.info("Пользователь id={} добавил в друзья id={}", id, friendId);
     }
 
     public Collection<User> getFriends(long id) {
+        log.debug("Запрос друзей пользователя id={}", id);
         getUser(id);
         return storage.getFriends(id);
     }
@@ -57,9 +60,12 @@ public class UserService {
         getUser(id);
         getUser(friendId);
         storage.deleteFriend(id, friendId);
+        feedService.addEvent(id, EventType.FRIEND, Operation.REMOVE, friendId);
+        log.info("Пользователь id={} удалил из друзей id={}", id, friendId);
     }
 
     public Collection<User> getCommonFriends(long id, long otherId) {
+        log.debug("Запрос общих друзей: {} и {}", id, otherId);
         getUser(id);
         getUser(otherId);
         return storage.getCommonFriends(id, otherId);

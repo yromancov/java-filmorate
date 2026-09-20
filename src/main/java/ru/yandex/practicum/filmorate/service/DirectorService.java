@@ -56,5 +56,4 @@ public class DirectorService {
         }
         log.info("Режиссёр с id ={} удален", id);
     }
-
 }
