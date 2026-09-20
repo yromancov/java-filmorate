@@ -164,7 +164,7 @@ public class FilmService {
         boolean byDirector = parts.contains("director");
 
         if (!byTitle && !byDirector) {
-            throw new ValidationException("Параметр by должен содеражть title и/или director");
+            throw new ValidationException("Параметр by должен содержать title и/или director");
         }
         return storage.searchByTitleOrDirector(query, byTitle, byDirector);
     }

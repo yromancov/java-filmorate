@@ -138,12 +138,10 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "ORDER BY likes_count DESC";
 
     private static final String FIND_FILMS_BY_TITLE =
-            "SELECT f.*, m.name AS mpa_name, COUNT(DISTINCT l.user_id) AS likes_count " +
+            "SELECT f.*, m.name AS mpa_name, COUNT(l.user_id) AS likes_count " +
                     "FROM films f " +
-                    "LEFT JOIN film_director fd ON f.film_id = fd.film_id " +
                     "LEFT JOIN mpa m ON f.age_rating_id = m.age_rating_id " +
                     "LEFT JOIN likesfilms l ON f.film_id = l.film_id " +
-                    "LEFT JOIN directors d ON fd.director_id = d.director_id " +
                     "WHERE LOWER(f.title) LIKE ? " +
                     "GROUP BY f.film_id, f.title, f.description, f.releaseDate, " +
                     "f.duration, f.age_rating_id, m.name " +
