@@ -137,6 +137,40 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "GROUP BY f.film_id, f.title, f.description, f.releaseDate, f.duration, f.age_rating_id, m.name " +
                     "ORDER BY likes_count DESC";
 
+    private static final String FIND_FILMS_BY_TITLE =
+            "SELECT f.*, m.name AS mpa_name, COUNT(l.user_id) AS likes_count " +
+                    "FROM films f " +
+                    "LEFT JOIN mpa m ON f.age_rating_id = m.age_rating_id " +
+                    "LEFT JOIN likesfilms l ON f.film_id = l.film_id " +
+                    "WHERE LOWER(f.title) LIKE ? " +
+                    "GROUP BY f.film_id, f.title, f.description, f.releaseDate, " +
+                    "f.duration, f.age_rating_id, m.name " +
+                    "ORDER BY likes_count DESC, f.film_id";
+
+    private static final String FIND_FILMS_BY_DIRECTOR =
+            "SELECT f.*, m.name AS mpa_name, COUNT(DISTINCT l.user_id) AS likes_count " +
+                    "FROM films f " +
+                    "LEFT JOIN film_director fd ON f.film_id = fd.film_id " +
+                    "LEFT JOIN mpa m ON f.age_rating_id = m.age_rating_id " +
+                    "LEFT JOIN likesfilms l ON f.film_id = l.film_id " +
+                    "LEFT JOIN directors d ON fd.director_id = d.director_id " +
+                    "WHERE LOWER(d.name) LIKE ? " +
+                    "GROUP BY f.film_id, f.title, f.description, f.releaseDate, " +
+                    "f.duration, f.age_rating_id, m.name " +
+                    "ORDER BY likes_count DESC, f.film_id";
+
+    private static final String FIND_FILM_BY_TITLE_AND_DIRECTOR =
+            "SELECT f.*, m.name AS mpa_name, COUNT(DISTINCT l.user_id) AS likes_count " +
+                    "FROM films f " +
+                    "LEFT JOIN film_director fd ON f.film_id = fd.film_id " +
+                    "LEFT JOIN mpa m ON f.age_rating_id = m.age_rating_id " +
+                    "LEFT JOIN likesfilms l ON f.film_id = l.film_id " +
+                    "LEFT JOIN directors d ON fd.director_id = d.director_id " +
+                    "WHERE LOWER(f.title) LIKE ? OR LOWER(d.name) LIKE ? " +
+                    "GROUP BY f.film_id, f.title, f.description, f.releaseDate, " +
+                    "f.duration, f.age_rating_id, m.name " +
+                    "ORDER BY likes_count DESC, f.film_id";
+
     @Override
     public boolean delete(long id) {
         return super.delete(DELETE_FILM_QUERY, id);
@@ -320,6 +354,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         });
     }
 
+    @Override
     public Collection<Film> getPopularFilmsByDirectorId(int id, String sortBy) {
         String query = "year".equals(sortBy) ?
                 FIND_BY_DIRECTOR_SORTED_BY_YEAR_QUERY
@@ -328,6 +363,23 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         loadGenresForFilms(films);
         loadDirectorsForFilms(films);
         return films;
+    }
+
+    @Override
+    public Collection<Film> searchByTitleOrDirector(String query, boolean byTitle, boolean byDirector) {
+        String pattern = "%" + query.toLowerCase() + "%";
+        List<Film> films = List.of();
+        if (byTitle && byDirector) {
+            films = findMany(FIND_FILM_BY_TITLE_AND_DIRECTOR, pattern, pattern);
+        } else if (byTitle) {
+            films = findMany(FIND_FILMS_BY_TITLE, pattern);
+        } else if (byDirector) {
+            films = findMany(FIND_FILMS_BY_DIRECTOR, pattern);
+        }
+        loadGenresForFilms(films);
+        loadDirectorsForFilms(films);
+        return films;
+
     }
 
 }
