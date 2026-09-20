@@ -1,17 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.time.LocalDate;
@@ -23,23 +20,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage storage;
     private final UserService userService;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
-
-    public FilmService(FilmStorage storage,
-                       UserService userService,
-                       MpaDbStorage mpaStorage,
-                       GenreDbStorage genreStorage, DirectorStorage directorStorage) {
-        this.storage = storage;
-        this.userService = userService;
-        this.mpaStorage = mpaStorage;
-        this.genreStorage = genreStorage;
-        this.directorStorage = directorStorage;
-    }
+    private final FeedService feedService;
 
     public Collection<Film> findAll() {
         log.info("Получен запрос GET /films");
@@ -55,6 +43,7 @@ public class FilmService {
         getFilm(id);
         userService.getUser(userId);
         storage.addLike(id, userId);
+        feedService.addEvent(userId, EventType.LIKE, Operation.ADD, id);
         log.info("Пользователь с id={} поставил лайк фильму с id={}", userId, id);
 
 
@@ -64,6 +53,7 @@ public class FilmService {
         getFilm(id);
         userService.getUser(userId);
         storage.deleteLike(id, userId);
+        feedService.addEvent(userId, EventType.LIKE, Operation.REMOVE, id);
         log.info("Пользователь с id={} удалил лайк фильму с id={}", userId, id);
     }
 
