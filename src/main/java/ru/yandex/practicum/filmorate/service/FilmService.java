@@ -42,21 +42,19 @@ public class FilmService {
     public void addLike(long id, long userId) {
         getFilm(id);
         userService.getUser(userId);
-        if (storage.addLike(id, userId)) {
-            feedService.addEvent(userId, EventType.LIKE, Operation.ADD, id);
-            log.info("Пользователь с id={} поставил лайк фильму с id={}", userId, id);
-        }
-
+        storage.addLike(id, userId);
+        feedService.addEvent(userId, EventType.LIKE, Operation.ADD, id);
+        log.info("Пользователь с id={} поставил лайк фильму с id={}", userId, id);
 
     }
 
     public void deleteLike(long id, long userId) {
         getFilm(id);
         userService.getUser(userId);
-        if (storage.deleteLike(id, userId)) {
-            feedService.addEvent(userId, EventType.LIKE, Operation.REMOVE, id);
-            log.info("Пользователь с id={} удалил лайк фильму с id={}", userId, id);
-        }
+        storage.deleteLike(id, userId);
+        feedService.addEvent(userId, EventType.LIKE, Operation.REMOVE, id);
+        log.info("Пользователь с id={} удалил лайк фильму с id={}", userId, id);
+
     }
 
     public Collection<Film> listOfTopFilmsByCount(long count, Integer genreId, Integer year) {

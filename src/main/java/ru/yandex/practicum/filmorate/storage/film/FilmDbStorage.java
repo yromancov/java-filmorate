@@ -246,7 +246,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         film.setId(id);
         saveGenres(film);
         saveDirectors(film);
-        return film;
+        return getFilm(id).orElseThrow();
     }
 
     @Override
@@ -264,7 +264,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         jdbc.update(DELETE_DIRECTORS_QUERY, film.getId());
         saveGenres(film);
         saveDirectors(film);
-        return film;
+        return getFilm(film.getId()).orElseThrow();
     }
 
     @Override
