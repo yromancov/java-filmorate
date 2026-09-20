@@ -67,8 +67,8 @@ public class FilmService {
         log.info("Пользователь с id={} удалил лайк фильму с id={}", userId, id);
     }
 
-    public Collection<Film> listOfTopFilmsByCount(long count) {
-        return storage.getPopular(count);
+    public Collection<Film> listOfTopFilmsByCount(long count ,Integer genreId, Integer year) {
+        return storage.getPopular(count, genreId, year);
     }
 
     public Film add(Film film) {

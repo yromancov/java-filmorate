@@ -103,7 +103,7 @@ class FilmDbStorageTests {
 
     @Test
     public void testGetPopular_ShouldReturnFilmsOrderedByLikes() {
-        Collection<Film> popular = filmStorage.getPopular(10);
+        Collection<Film> popular = filmStorage.getPopular(10,3,4);
 
         assertThat(popular).hasSize(2);
         Film firstPopular = popular.iterator().next();
