@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.director;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,6 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
             "UPDATE directors SET name = ? WHERE director_id = ?";
     private static final String DELETE_QUERY =
             "DELETE from directors WHERE director_id = ?";
-
 
 
     public DirectorDbStorage(NamedParameterJdbcTemplate namedJdbc, RowMapper<Director> mapper) {
