@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import ru.yandex.practicum.filmorate.controller.storage.user.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.mapper.UserRowMap;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -18,11 +17,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @AutoConfigureTestDatabase
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({UserDbStorage.class, UserRowMap.class}) // Добавьте сюда точное имя класса вашего маппера для User
 class UserDbStorageTests {
 
     private final UserDbStorage userStorage;
+
+    @Autowired
+    UserDbStorageTests(UserDbStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     @Test
     public void testGetUser_ShouldReturnUserFromDataSql() {

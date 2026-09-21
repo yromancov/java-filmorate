@@ -1,17 +1,18 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.controller.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.controller.storage.genre.GenreDbStorage;
-import ru.yandex.practicum.filmorate.controller.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,21 +20,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage storage;
     private final UserService userService;
-    private final MpaDbStorage mpaStorage;
-    private final GenreDbStorage genreStorage;
-
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage storage,
-                       UserService userService,
-                       MpaDbStorage mpaStorage,
-                       GenreDbStorage genreStorage) {
-        this.storage = storage;
-        this.userService = userService;
-        this.mpaStorage = mpaStorage;
-        this.genreStorage = genreStorage;
-    }
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
+    private final FeedService feedService;
 
     public Collection<Film> findAll() {
         log.info("Получен запрос GET /films");
@@ -49,8 +43,8 @@ public class FilmService {
         getFilm(id);
         userService.getUser(userId);
         storage.addLike(id, userId);
+        feedService.addEvent(userId, EventType.LIKE, Operation.ADD, id);
         log.info("Пользователь с id={} поставил лайк фильму с id={}", userId, id);
-
 
     }
 
@@ -58,11 +52,13 @@ public class FilmService {
         getFilm(id);
         userService.getUser(userId);
         storage.deleteLike(id, userId);
+        feedService.addEvent(userId, EventType.LIKE, Operation.REMOVE, id);
         log.info("Пользователь с id={} удалил лайк фильму с id={}", userId, id);
+
     }
 
-    public Collection<Film> listOfTopFilmsByCount(long count) {
-        return storage.getPopular(count);
+    public Collection<Film> listOfTopFilmsByCount(long count, Integer genreId, Integer year) {
+        return storage.getPopular(count, genreId, year);
     }
 
     public Film add(Film film) {
@@ -86,7 +82,15 @@ public class FilmService {
         return saved;
     }
 
-    public void validateFilm(Film film) {
+    public void delete(long id) {
+        log.info("Получен запрос DELETE /films/{}", id);
+        if (!storage.delete(id)) {
+            throw new NotFoundException("Фильм с id = " + id + " не найден");
+        }
+        log.info("Фильм с id={} успешно удалён", id);
+    }
+
+    private void validateFilm(Film film) {
         log.info("Запуск валидации фильма");
 
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
@@ -104,15 +108,55 @@ public class FilmService {
             Set<Integer> requested = film.getGenres().stream()
                     .map(Genre::getId)
                     .collect(Collectors.toSet());
-
             Set<Integer> missing = new HashSet<>(requested);
             missing.removeAll(genreStorage.findExistingIds(requested));
-
             if (!missing.isEmpty()) {
                 throw new NotFoundException("Жанр с id = " + missing.iterator().next() + " не найден");
             }
         }
 
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            Set<Integer> requested = film.getDirectors().stream()
+                    .map(Director::getId)
+                    .collect(Collectors.toSet());
+            Set<Integer> missing = new HashSet<>(requested);
+            missing.removeAll(directorStorage.findExistingIds(requested));
+            if (!missing.isEmpty()) {
+                throw new NotFoundException("Режиссёр с id = " + missing.iterator().next() + " не найден");
+            }
+        }
+
         log.info("Валидация фильма пройдена успешно");
     }
+
+    public Collection<Film> getPopularFilmsByDirectorId(int id, String sortBy) {
+        log.info("Получен запрос GET /films/director/{}?sortBy={}", id, sortBy);
+        directorStorage.findById(id).orElseThrow(() -> new NotFoundException("Режиссёр с id = " + id + " не найден"));
+        if (!"year".equals(sortBy) && !"likes".equals(sortBy)) {
+            throw new ValidationException("Недопустимое значение sortBy: " + sortBy);
+        }
+        return storage.getPopularFilmsByDirectorId(id, sortBy);
+    }
+
+    public Collection<Film> getCommonFilms(long userId, long friendId) {
+        log.info("Получен запрос GET /films/common?userId={}&friendId={}", userId, friendId);
+        userService.getUser(userId);
+        userService.getUser(friendId);
+        return storage.getCommonFilms(userId, friendId);
+    }
+
+    public Collection<Film> searchByTitleOrDirector(String query, String by) {
+        log.info("Получен GET запрос /films/search?query={}&by={}", query, by);
+        Set<String> parts = Arrays.stream(by.toLowerCase().split(","))
+                .map(String::trim)
+                .collect(Collectors.toSet());
+        boolean byTitle = parts.contains("title");
+        boolean byDirector = parts.contains("director");
+
+        if (!byTitle && !byDirector) {
+            throw new ValidationException("Параметр by должен содержать title и/или director");
+        }
+        return storage.searchByTitleOrDirector(query, byTitle, byDirector);
+    }
+
 }

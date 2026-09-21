@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.dal;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 import java.sql.PreparedStatement;
@@ -11,10 +11,17 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
+
 public class BaseStorage<T> {
-    protected final JdbcTemplate jdbc;
+    protected final NamedParameterJdbcTemplate namedJdbc;
+    protected final JdbcOperations jdbc;
     protected final RowMapper<T> mapper;
+
+    public BaseStorage(NamedParameterJdbcTemplate namedJdbc, RowMapper<T> mapper) {
+        this.namedJdbc = namedJdbc;
+        this.jdbc = namedJdbc.getJdbcOperations();
+        this.mapper = mapper;
+    }
 
     protected Optional<T> findOne(String query, Object... params) {
         try {
@@ -54,5 +61,6 @@ public class BaseStorage<T> {
         }
         return id;
     }
+
 
 }

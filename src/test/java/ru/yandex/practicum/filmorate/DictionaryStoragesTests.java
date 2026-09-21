@@ -1,13 +1,12 @@
 package ru.yandex.practicum.filmorate;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import ru.yandex.practicum.filmorate.controller.storage.genre.GenreDbStorage;
-import ru.yandex.practicum.filmorate.controller.storage.mpa.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.mapper.GenreRowMap;
 import ru.yandex.practicum.filmorate.mapper.MpaRowMap;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -20,12 +19,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @AutoConfigureTestDatabase
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({MpaDbStorage.class, GenreDbStorage.class, MpaRowMap.class, GenreRowMap.class})
 class DictionaryStoragesTests {
 
     private final MpaDbStorage mpaStorage;
     private final GenreDbStorage genreStorage;
+
+    @Autowired
+    DictionaryStoragesTests(MpaDbStorage mpaStorage, GenreDbStorage genreStorage) {
+        this.mpaStorage = mpaStorage;
+        this.genreStorage = genreStorage;
+    }
 
     @Test
     public void testFindAllMpa() {

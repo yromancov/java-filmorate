@@ -1,7 +1,7 @@
-package ru.yandex.practicum.filmorate.controller.storage.user;
+package ru.yandex.practicum.filmorate.storage.user;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dal.BaseStorage;
 import ru.yandex.practicum.filmorate.model.StatusFriend;
@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.Optional;
 
-@Component("userDbStorage")
+@Component
 public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
     private static final String FIND_ALL_FRIENDS = "SELECT u.* FROM users u " +
@@ -41,8 +41,15 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
                     "JOIN follows f2 ON u.user_id = f2.followed_user_id " +
                     "WHERE f1.following_user_id = ? AND f2.following_user_id = ?";
 
-    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
-        super(jdbc, mapper);
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE user_id = ?";
+
+    public UserDbStorage(NamedParameterJdbcTemplate namedJdbc, RowMapper<User> mapper) {
+        super(namedJdbc, mapper);
+    }
+
+    @Override
+    public boolean delete(long id) {
+        return super.delete(DELETE_USER_QUERY, id);
     }
 
     @Override
@@ -87,9 +94,9 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     }
 
     @Override
-    public void addFriend(long id, long friendId) {
+    public boolean addFriend(long id, long friendId) {
         if (hasRow(id, friendId)) {
-            return;
+            return false;
         }
         boolean mutual = hasRow(friendId, id);
 
@@ -99,12 +106,16 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
         if (mutual) {
             jdbc.update(UPDATE_STATUS_QUERY, StatusFriend.CONFIRM.name(), friendId, id);
         }
+        return true;
     }
 
     @Override
-    public void deleteFriend(long id, long friendId) {
-        jdbc.update(DELETE_FRIEND_QUERY, id, friendId);
-        jdbc.update(UPDATE_STATUS_QUERY, StatusFriend.NOT_CONFIRM.name(), friendId, id);
+    public boolean deleteFriend(long id, long friendId) {
+        int deleted = jdbc.update(DELETE_FRIEND_QUERY, id, friendId);
+        if (deleted > 0) {
+            jdbc.update(UPDATE_STATUS_QUERY, StatusFriend.NOT_CONFIRM.name(), friendId, id);
+        }
+        return deleted > 0;
     }
 
     private boolean hasRow(long from, long to) {
