@@ -182,13 +182,12 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     private final RowMapper<Genre> genreMapper;
     private final RowMapper<Director> directorMapper;
-    private final NamedParameterJdbcTemplate namedJdbc;
 
-    public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, RowMapper<Genre> genreMapper, RowMapper<Director> directorMapper) {
-        super(jdbc, mapper);
+
+    public FilmDbStorage(NamedParameterJdbcTemplate namedJdbc, RowMapper<Film> mapper, RowMapper<Genre> genreMapper, RowMapper<Director> directorMapper) {
+        super(namedJdbc, mapper);
         this.genreMapper = genreMapper;
         this.directorMapper = directorMapper;
-        this.namedJdbc = new NamedParameterJdbcTemplate(jdbc);
     }
 
     @Override

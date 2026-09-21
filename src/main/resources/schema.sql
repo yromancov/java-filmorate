@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS films(
     title VARCHAR(200) NOT NULL,
     description VARCHAR(200),
     releaseDate DATE NOT NULL,
-    duration INTEGER,
+    duration INTEGER CHECK (duration > 0),
     age_rating_id INTEGER REFERENCES mpa (age_rating_id)
 );
 

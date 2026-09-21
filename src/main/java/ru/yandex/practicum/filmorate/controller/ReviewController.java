@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
@@ -11,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
+@Validated
 public class ReviewController {
 
     private final ReviewService reviewService;
@@ -26,39 +29,39 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable @Positive Long id) {
         reviewService.delete(id);
     }
 
     @GetMapping("/{id}")
-    public Review findById(@PathVariable Long id) {
+    public Review findById(@PathVariable @Positive Long id) {
         return reviewService.findById(id);
     }
 
     @GetMapping
     public List<Review> findByFilmId(
-            @RequestParam(required = false) Long filmId,
-            @RequestParam(defaultValue = "10") int count) {
+            @RequestParam(required = false) @Positive Long filmId,
+            @RequestParam(defaultValue = "10") @Positive int count) {
         return reviewService.findByFilmId(filmId, count);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+    public void addLike(@PathVariable @Positive Long id, @PathVariable @Positive Long userId) {
         reviewService.addLike(id, userId, true);
     }
 
     @PutMapping("/{id}/dislike/{userId}")
-    public void addDislike(@PathVariable Long id, @PathVariable Long userId) {
+    public void addDislike(@PathVariable @Positive Long id, @PathVariable @Positive Long userId) {
         reviewService.addLike(id, userId, false);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
+    public void removeLike(@PathVariable @Positive Long id, @PathVariable @Positive Long userId) {
         reviewService.removeLike(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
-    public void removeDislike(@PathVariable Long id, @PathVariable Long userId) {
+    public void removeDislike(@PathVariable @Positive Long id, @PathVariable @Positive Long userId) {
         reviewService.removeLike(id, userId);
     }
 

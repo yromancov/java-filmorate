@@ -22,15 +22,10 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     private static final String DELETE_QUERY =
             "DELETE from directors WHERE director_id = ?";
 
-    // Что это такое?
-    // Обёртка над JdbcTemplate
-    // С его помощью в SQL запрос вместо одного параметра через {WHERE director_id = ?}
-    // можно передать несколько значений через {WHERE director_id IN (:ids) где ids наша коллекция id}
-    private final NamedParameterJdbcTemplate namedJdbc;
 
-    public DirectorDbStorage(JdbcTemplate jdbc, RowMapper<Director> mapper) {
-        super(jdbc, mapper);
-        this.namedJdbc = new NamedParameterJdbcTemplate(jdbc);
+
+    public DirectorDbStorage(NamedParameterJdbcTemplate namedJdbc, RowMapper<Director> mapper) {
+        super(namedJdbc, mapper);
     }
 
     @Override

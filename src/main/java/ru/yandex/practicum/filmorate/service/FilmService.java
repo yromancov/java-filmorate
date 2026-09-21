@@ -90,7 +90,7 @@ public class FilmService {
         log.info("Фильм с id={} успешно удалён", id);
     }
 
-    public void validateFilm(Film film) {
+    private void validateFilm(Film film) {
         log.info("Запуск валидации фильма");
 
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {

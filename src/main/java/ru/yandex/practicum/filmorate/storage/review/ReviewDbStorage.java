@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.review;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.dal.BaseStorage;
@@ -58,8 +59,8 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     private static final String UPDATE_LIKE_QUERY =
             "UPDATE review_likes SET is_useful = ? WHERE review_id = ? AND user_id = ?";
 
-    public ReviewDbStorage(JdbcTemplate jdbc, RowMapper<Review> mapper) {
-        super(jdbc, mapper);
+    public ReviewDbStorage(NamedParameterJdbcTemplate namedJdbc, RowMapper<Review> mapper) {
+        super(namedJdbc, mapper);
     }
 
 

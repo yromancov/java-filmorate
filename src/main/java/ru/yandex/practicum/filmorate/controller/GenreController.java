@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +18,7 @@ import java.util.Collection;
 @RequestMapping("/genres")
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class GenreController {
     private final GenreDbStorage storage;
 
@@ -25,7 +28,7 @@ public class GenreController {
     }
 
     @GetMapping("/{id}")
-    public Genre getGenre(@PathVariable int id) {
+    public Genre getGenre(@PathVariable @Positive int id) {
         return storage.findById(id).orElseThrow(() ->
                 new NotFoundException("Жанр с id = " + id + " не найден"));
     }

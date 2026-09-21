@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.feed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.dal.BaseStorage;
@@ -23,8 +24,8 @@ public class FeedDbStorage extends BaseStorage<Event> implements FeedStorage {
             "operation, entity_id " +
             "FROM feed WHERE user_id = ? ORDER BY event_timestamp ASC";
 
-    public FeedDbStorage(JdbcTemplate jdbc, RowMapper<Event> rowMapper) {
-        super(jdbc, rowMapper);
+    public FeedDbStorage(NamedParameterJdbcTemplate namedJdbc, RowMapper<Event> rowMapper) {
+        super(namedJdbc, rowMapper);
     }
 
     @Override

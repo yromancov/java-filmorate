@@ -17,16 +17,9 @@ public class GenreDbStorage extends BaseStorage<Genre> implements GenreStorage {
     private static final String FIND_EXISTING_IDS_QUERY =
             "SELECT genre_id FROM genre WHERE genre_id IN (:ids)";
 
-    private final NamedParameterJdbcTemplate namedJdbc;
 
-    public GenreDbStorage(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
-        super(jdbc, mapper);
-
-        // Что это такое?
-        // Обёртка над JdbcTemplate
-        // С его помощью в SQL запрос вместо одного параметра через {WHERE genre_id = ?}
-        // можно передать несколько значений через {WHERE genre_id IN (:ids) где ids наша коллекция id}
-        this.namedJdbc = new NamedParameterJdbcTemplate(jdbc);
+    public GenreDbStorage(NamedParameterJdbcTemplate namedJdbc, RowMapper<Genre> mapper) {
+        super(namedJdbc, mapper);
     }
 
     public Collection<Genre> findAll() {

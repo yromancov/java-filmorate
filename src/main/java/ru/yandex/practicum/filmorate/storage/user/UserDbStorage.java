@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dal.BaseStorage;
 import ru.yandex.practicum.filmorate.model.StatusFriend;
@@ -43,8 +44,8 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE user_id = ?";
 
-    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
-        super(jdbc, mapper);
+    public UserDbStorage(NamedParameterJdbcTemplate namedJdbc, RowMapper<User> mapper) {
+        super(namedJdbc, mapper);
     }
 
     @Override

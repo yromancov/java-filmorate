@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -15,6 +17,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
     private final UserService service;
     private final FeedService feedService;
@@ -30,27 +33,27 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> getFriends(@PathVariable long id) {
+    public Collection<User> getFriends(@PathVariable @Positive long id) {
         return service.getFriends(id);
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable long id) {
+    public User getUserById(@PathVariable @Positive long id) {
         return service.getUser(id);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriendById(@PathVariable long id, @PathVariable long friendId) {
+    public void deleteFriendById(@PathVariable @Positive long id, @PathVariable @Positive long friendId) {
         service.deleteFriendById(id, friendId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Collection<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
+    public Collection<User> getCommonFriends(@PathVariable @Positive long id, @PathVariable @Positive long otherId) {
         return service.getCommonFriends(id, otherId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable long id, @PathVariable long friendId) {
+    public void addFriend(@PathVariable @Positive long id, @PathVariable long friendId) {
         service.addFriend(id, friendId);
     }
 
@@ -61,18 +64,18 @@ public class UserController {
     }
 
     @GetMapping("/{id}/recommendations")
-    public Collection<Film> getRecommendations(@PathVariable long id) {
+    public Collection<Film> getRecommendations(@PathVariable @Positive long id) {
         return service.getRecommendations(id);
     }
 
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable long userId) {
+    public void deleteUser(@PathVariable @Positive long userId) {
         service.delete(userId);
     }
 
     @GetMapping("/{id}/feed")
-    public List<Event> getFeed(@PathVariable Long id) {
+    public List<Event> getFeed(@PathVariable @Positive Long id) {
         return feedService.getFeed(id);
     }
 }
